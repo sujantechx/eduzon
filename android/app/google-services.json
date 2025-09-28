@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "589958621003",
+    "project_id": "eduzon-7c23d",
+    "storage_bucket": "eduzon-7c23d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:589958621003:android:6808809f65a08a699f6ace",
+        "android_client_info": {
+          "package_name": "com.example.eduzon"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_p7eefqg6eRuvAIpbjfl7JD9ETDFkpvE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

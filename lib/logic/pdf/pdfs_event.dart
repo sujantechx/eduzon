@@ -1,0 +1,60 @@
+// lib/logic/pdf/pdfs_event.dart
+
+import 'package:equatable/equatable.dart';
+
+abstract class PdfsEvent extends Equatable {
+  const PdfsEvent();
+  @override
+  List<Object> get props => [];
+}
+
+class LoadPdfs extends PdfsEvent {
+  final String courseId;
+  final String subjectId;
+  final String chapterId;
+  const LoadPdfs({required this.courseId, required this.subjectId, required this.chapterId});
+  @override
+  List<Object> get props => [courseId, subjectId, chapterId];
+}
+
+// Add this event
+class AddPdf extends PdfsEvent {
+  final String courseId;
+  final String subjectId;
+  final String chapterId;
+  final String title;
+  final String url;
+
+  const AddPdf({
+    required this.courseId,
+    required this.subjectId,
+    required this.chapterId,
+    required this.title,
+    required this.url,
+  });
+
+  @override
+  List<Object> get props => [courseId, subjectId, chapterId, title, url];
+}
+
+// Add this event
+class UpdatePdf extends PdfsEvent {
+  final String courseId;
+  final String subjectId;
+  final String chapterId;
+  final String id; // Document ID of the PDF to update
+  final String newTitle;
+  final String newUrl;
+
+  const UpdatePdf({
+    required this.courseId,
+    required this.subjectId,
+    required this.chapterId,
+    required this.id,
+    required this.newTitle,
+    required this.newUrl,
+  });
+
+  @override
+  List<Object> get props => [courseId, subjectId, chapterId, id, newTitle, newUrl];
+}
