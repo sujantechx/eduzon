@@ -1,11 +1,11 @@
 // lib/presentation/screens/student/subjects_list_screen.dart
+import 'package:eduzon/data/repositories/admin_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/routes/app_routes.dart';
 import '../../../data/models/subject_model.dart';
-import '../../../data/repositories/content_repository.dart';
 
 class SubjectsListScreen extends StatelessWidget {
   const SubjectsListScreen({super.key});
@@ -14,9 +14,9 @@ class SubjectsListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Subjects Video')),
-      body: StreamBuilder<List<SubjectModel>>(
+      body: FutureBuilder<List<SubjectModel>>(
         // Listen to the stream of subjects from the repository.
-        stream: context.read<ContentRepository>().getSubjects(),
+        future: context.read<AdminRepository>().getSubjects(courseId: ''),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

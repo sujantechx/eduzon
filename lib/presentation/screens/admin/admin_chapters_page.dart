@@ -12,9 +12,9 @@ import '../../../logic/chapter/chapters_state.dart';
 
 class AdminChaptersPage extends StatelessWidget {
   final SubjectModel subject;
-  final String courseId = 'ojee_2025_2026_batch';
+  final String courseId ;
 
-  const AdminChaptersPage({super.key, required this.subject});
+  const AdminChaptersPage({super.key, required this.subject, required this.courseId});
 
   @override
   Widget build(BuildContext context) {
@@ -63,15 +63,15 @@ class AdminChaptersPage extends StatelessWidget {
                                 const Icon(Icons.arrow_forward_ios),
                               ],
                             ),
-                            onTap: () {
-                              context.push(
-                                AppRoutes.adminContent,
-                                extra: {
-                                  'subject': subject,
-                                  'chapter': chapter,
-                                },
-                              );
-                            }
+                          onTap: () {
+                            // Pass a Map with both pieces of data to the chapters page
+                            context.push(AppRoutes.adminContent, extra: {
+                              'courseId': courseId,
+                              'subject': subject,
+                              'chapter': chapter,
+
+                            });
+                          },
                         );
                       },
                     );

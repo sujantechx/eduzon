@@ -61,4 +61,19 @@ class ChaptersBloc extends Bloc<ChaptersEvent, ChaptersState> {
       emit(ChaptersError(e.toString()));
     }
   }
+  // Add the _onDeleteChapter method if needed
+void _onDeleteChapter(DeleteChapter event, Emitter<ChaptersState> emit) async {
+    try {
+      await _adminRepository.deleteChapter(
+        courseId: event.courseId,
+        subjectId: event.subjectId,
+        chapterId: event.chapterId,
+      );
+      // After deleting, reload the list
+      add(LoadChapters(courseId: event.courseId, subjectId: event.subjectId));
+    } catch (e) {
+      emit(ChaptersError(e.toString()));
+    }
+  }
+
 }

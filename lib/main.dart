@@ -1,3 +1,5 @@
+import 'package:eduzon/data/repositories/admin_repository.dart';
+import 'package:eduzon/logic/Courses/courses_cubit.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +17,6 @@ import 'logic/auth/admin_cubit.dart';
 import 'data/repositories/auth_repository.dart';
 import 'logic/auth/auth_bloc.dart';
 import 'logic/theme/theme_cubit.dart';
-import 'logic/content/content_cubit.dart'; // Added import for ContentCubit to provide content management state
-import 'data/repositories/content_repository.dart';
 import 'logic/theme/theme_state.dart'; // Added import for ContentRepository required by ContentCubit
 import 'data/repositories/pdf_repository.dart';
 
@@ -81,25 +81,25 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => authCubit..init()),
         BlocProvider(create: (context) => adminCubit),
         BlocProvider(create: (context) => themeCubit),
-
-        // ✅ 1. Provide the ContentRepository itself.
-        // This must come BEFORE the ContentCubit which depends on it.
-        Provider<ContentRepository>(
-          create: (_) => ContentRepository(),
+        // ✅ 3. Provide the AdminRepository that CoursesCubit depends on.
+        Provider<AdminRepository>(
+          create: (_) => AdminRepository(),
         ),
-
-        // ✅ 2. Now, your ContentCubit can be created successfully
-        // because it can find and read the ContentRepository provided above.
-        BlocProvider<ContentCubit>(
-          create: (context) => ContentCubit(
-            contentRepository: context.read<ContentRepository>(),
+        // ✅ 4. Now, your CoursesCubit can be created successfully
+        // because it can find and read the AdminRepository provided above.
+        BlocProvider<CoursesCubit>(
+          create: (context) => CoursesCubit(
+            adminRepository: context.read<AdminRepository>(),
           ),
         ),
+
         Provider<PdfRepository>(
           create: (_) => PdfRepository(),
         ),
 
       ],
+
+
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, state) {
           return MaterialApp.router(

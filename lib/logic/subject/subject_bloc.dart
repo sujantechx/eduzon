@@ -1,5 +1,5 @@
-import 'package:eduzon/logic/admin/subject_event.dart';
-import 'package:eduzon/logic/admin/subject_state.dart';
+import 'package:eduzon/logic/subject/subject_event.dart';
+import 'package:eduzon/logic/subject/subject_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/repositories/admin_repository.dart';
 
@@ -24,6 +24,7 @@ class SubjectsBloc extends Bloc<SubjectEvent, SubjectState> {
   }
 
   void _onAddSubject(AddSubject event, Emitter<SubjectState> emit) async {
+    emit(SubjectsLoading());
     try {
       await _adminRepository.addSubject(
         courseId: event.courseId,
@@ -38,6 +39,7 @@ class SubjectsBloc extends Bloc<SubjectEvent, SubjectState> {
   }
 
   void _onUpdateSubject(UpdateSubject event, Emitter<SubjectState> emit) async {
+    emit(SubjectsLoading());
     try {
       await _adminRepository.updateSubject(
         courseId: event.courseId,

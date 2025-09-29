@@ -1,4 +1,5 @@
 // lib/presentation/screens/student/videos_list_screen.dart
+import 'package:eduzon/data/repositories/admin_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -6,7 +7,6 @@ import '../../../core/routes/app_routes.dart';
 import '../../../data/models/chapter_model.dart';
 import '../../../data/models/subject_model.dart';
 import '../../../data/models/video_model.dart';
-import '../../../data/repositories/content_repository.dart';
 
 class VideosListScreen extends StatelessWidget {
   final SubjectModel subject;
@@ -17,8 +17,8 @@ class VideosListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(chapter.title)),
-      body: StreamBuilder<List<VideoModel>>(
-        stream: context.read<ContentRepository>().getVideos(subjectId: subject.id, chapterId: chapter.id),
+      body: FutureBuilder<List<VideoModel>>(
+        future: context.read<AdminRepository>().getVideos(subjectId: subject.id, chapterId: chapter.id, courseId: ''),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

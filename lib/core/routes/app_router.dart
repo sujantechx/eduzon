@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:eduzon/data/models/courses_moddel.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:developer' as developer;
@@ -7,6 +8,7 @@ import '../../data/models/pdf_model.dart';
 import '../../data/models/subject_model.dart';
 import '../../logic/auth/auth_bloc.dart';
 import '../../logic/auth/auth_state.dart';
+import '../../presentation/screens/Courses/manage_courses_screen.dart';
 import '../../presentation/screens/admin/admin_dashboard_screen.dart';
 import '../../presentation/screens/admin/admin_chapters_page.dart';
 import '../../presentation/screens/admin/admin_content_page.dart';
@@ -44,32 +46,48 @@ class AppRouter {
         GoRoute(path: AppRoutes.pendingApproval, builder: (context, state) => const PendingApprovalScreen()),
         GoRoute(path: AppRoutes.adminDashboard, builder: (context, state) => const AdminDashboardScreen()),
         GoRoute(path: AppRoutes.manageStudents, builder: (context, state) => const ManageStudentsScreen()),
-        GoRoute(path: AppRoutes.AdminSubjects, builder: (context, state) => const AdminSubjectsPage()),
-        GoRoute(
-          path: AppRoutes.adminContent, // Make sure this matches your AppRoutes file
-          builder: (context, state) {
-            // 1. Cast the 'extra' data to the expected Map type
-            final data = state.extra as Map<String, dynamic>;
 
-            // 2. Extract the subject and chapter from the map
+        GoRoute(
+          path: AppRoutes.manageCourses,
+          builder: (context, state) => const ManageCoursesScreen(),
+        ),
+        GoRoute(
+          path: AppRoutes.AdminSubjects,
+          builder: (context, state) {
+            // Read the courseId string passed via the 'extra' parameter.
+            final courseId = state.extra as String;
+            return AdminSubjectsPage(courseId: courseId);
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.adminContent,
+          builder: (context, state) {
+            final data = state.extra as Map<String, dynamic>;
+            final courseId = data['courseId'] as String;
             final subject = data['subject'] as SubjectModel;
             final chapter = data['chapter'] as ChapterModel;
 
-            // 3. Pass the extracted data to the page widget
-            return AdminContentPage(subject: subject, chapter: chapter);
+            return AdminContentPage(courseId: courseId, subject: subject, chapter: chapter);
           },
         ),
         GoRoute(
           path: AppRoutes.AdminChapters,
           builder: (context, state) {
-            final subject = state.extra as SubjectModel;
-            return AdminChaptersPage(subject: subject);
+            // 1. Cast the 'extra' data to the expected Map type.
+            final data = state.extra as Map<String, dynamic>;
+            // 2. Extract the courseId and subject from the map.
+            final courseId = data['courseId'] as String;
+            final subject = data['subject'] as SubjectModel;
+
+            // 3. Pass the data to the page widget.
+            return AdminChaptersPage(courseId: courseId, subject: subject);
           },
         ),
         GoRoute(
           path: AppRoutes.chaptersList,
           builder: (context, state) {
             final subject = state.extra as SubjectModel;
+
             return ChaptersListScreen(subject: subject);
           },
         ), GoRoute(

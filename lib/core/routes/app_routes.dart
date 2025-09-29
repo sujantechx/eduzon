@@ -38,6 +38,7 @@ class AppRoutes {
   static const String AdminSubjects = '/admin/manage-subject';
   static const String adminVideoPlayer = '/admin/video-player';
   static const String adminPdfViewer = '/admin/pdf-viewer';
+  static const String manageCourses = '/admin/manage-courses';
 
 // static const String AdminChapters = '/admin/manage-chapters';
 // We will add '/admin/manage-videos' here in the next step.

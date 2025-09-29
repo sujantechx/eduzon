@@ -5,26 +5,25 @@ import 'package:go_router/go_router.dart';
 import '../../../core/routes/app_routes.dart'; // Your GoRouter routes
 import '../../../data/models/subject_model.dart';
 import '../../../data/repositories/admin_repository.dart';
-import '../../../logic/admin/subject_bloc.dart';
-import '../../../logic/admin/subject_event.dart';
-import '../../../logic/admin/subject_state.dart';
+import '../../../logic/subject/subject_bloc.dart';
+import '../../../logic/subject/subject_event.dart';
+import '../../../logic/subject/subject_state.dart';
+
 
 
 class AdminSubjectsPage extends StatelessWidget {
-  // You would likely get this from a previous screen or a global state
-  final String courseId = 'ojee_2025_2026_batch';
+  final String courseId;
 
-  const AdminSubjectsPage({super.key});
+  const AdminSubjectsPage({super.key, required this.courseId});
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => SubjectsBloc(AdminRepository())
+      // ✅ UPDATED: Read the existing AdminRepository instead of creating a new one.
+      create: (context) => SubjectsBloc(context.read<AdminRepository>())
         ..add(LoadSubjects(courseId: courseId)),
-      // Use a Builder to get a context that is a descendant of the BlocProvider
-
       child: Builder(
-          builder: (context) { // <-- This 'context' can now find the SubjectsBloc
+          builder: (context) {
             return Scaffold(
               appBar: AppBar(
                 title: const Text('Manage Subjects'),
@@ -57,11 +56,14 @@ class AdminSubjectsPage extends StatelessWidget {
                           subtitle: Text(subject.description),
                           trailing: IconButton(
                             icon: const Icon(Icons.edit, color: Colors.blue),
-                            // Now this context is correct
                             onPressed: () => _showAddEditSubjectDialog(context, subject: subject),
                           ),
                           onTap: () {
-                            context.push(AppRoutes.AdminChapters, extra: subject);
+                            // Pass a Map with both pieces of data to the chapters page
+                            context.push(AppRoutes.AdminChapters, extra: {
+                              'courseId': courseId,
+                              'subject': subject,
+                            });
                           },
                         );
                       },
@@ -72,7 +74,6 @@ class AdminSubjectsPage extends StatelessWidget {
               ),
               floatingActionButton: FloatingActionButton(
                 onPressed: () {
-                  // And this context is also correct
                   _showAddEditSubjectDialog(context);
                 },
                 child: const Icon(Icons.add),

@@ -12,9 +12,7 @@ abstract class SubjectEvent extends Equatable {
 /// Event to load all subjects for a specific course.
 class LoadSubjects extends SubjectEvent {
   final String courseId;
-
   const LoadSubjects({required this.courseId});
-
   @override
   List<Object> get props => [courseId];
 }

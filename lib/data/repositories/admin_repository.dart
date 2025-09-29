@@ -2,22 +2,49 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/chapter_model.dart';
+import '../models/courses_moddel.dart';
 import '../models/pdf_model.dart';
 import '../models/subject_model.dart';
 import '../models/video_model.dart';
+// Handles all content management operations (Subjects, Chapters, Videos).
+/*
+class ContentRepository {
+  final FirebaseFirestore _firestore;
+  // The main course document we are working with.
+  final DocumentReference _courseDoc;
+
+  ContentRepository({FirebaseFirestore? firestore})
+      : _firestore = firestore ?? FirebaseFirestore.instance,
+        _courseDoc = FirebaseFirestore.instance.collection('courses').doc('ojee_2025_2026_batch');
+*/
+
 
 class AdminRepository {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
   // Helper to get the base collection reference
   CollectionReference _coursesRef() => _firestore.collection('courses');
 
   // --- FETCH (READ) OPERATIONS ---
+  // --- COURSE MANAGEMENT (CREATE, READ, UPDATE, DELETE) ---
+  /// Fetches a list of all courses.
+  Future<List<CoursesModel>> getCourses() async {
+    try {
+      final snapshot = await _coursesRef().get();
+      return snapshot.docs.map((doc) => CoursesModel.fromSnapshot(doc)).toList();
+    } catch (e) {
+      print("Error fetching courses: $e");
+      throw Exception('Failed to load courses.');
+    }
+  }
 
   /// Fetches all subjects for a given course.
   Future<List<SubjectModel>> getSubjects({required String courseId}) async {
     try {
+      print('Attempting to fetch subjects for course ID: $courseId');
+
       final snapshot = await _coursesRef().doc(courseId).collection('subjects').get();
+      print('Successfully found ${snapshot.docs.length} subjects.');
+
       return snapshot.docs.map((doc) => SubjectModel.fromSnapshot(doc)).toList();
     } catch (e) {
       print("Error fetching subjects: $e");
@@ -59,6 +86,18 @@ class AdminRepository {
   }
 
   // --- ADD (CREATE) OPERATIONS ---
+  /// Adds a new course document.
+  Future<void> addCourse({required String title, required String description}) async {
+    try {
+      await _coursesRef().add({
+        'title': title,
+        'description': description,
+      });
+    } catch (e) {
+      print("Error adding course: $e");
+      throw Exception('Failed to add course.');
+    }
+  }
 
   /// Adds a new subject to a course.
   Future<void> addSubject({required String courseId, required String title, required String description}) async {
@@ -113,6 +152,15 @@ class AdminRepository {
   }
 
   // --- UPDATE OPERATIONS ---
+  /// Updates an existing course's data.
+  Future<void> updateCourse({required String courseId, required Map<String, dynamic> data}) async {
+    try {
+      await _coursesRef().doc(courseId).update(data);
+    } catch (e) {
+      print("Error updating course: $e");
+      throw Exception('Failed to update course.');
+    }
+  }
 
   /// Updates an existing subject's data.
   Future<void> updateSubject({required String courseId, required String subjectId, required Map<String, dynamic> data}) async {
@@ -155,7 +203,17 @@ class AdminRepository {
   }
 
   // --- DELETE OPERATIONS ---
-
+  /// Deletes a course document.
+  /// IMPORTANT: This does NOT delete the sub-collections (subjects, chapters, etc.).
+  /// For a full recursive delete, you must use a Firebase Cloud Function.
+  Future<void> deleteCourse({required String courseId}) async {
+    try {
+      await _coursesRef().doc(courseId).delete();
+    } catch (e) {
+      print("Error deleting course: $e");
+      throw Exception('Failed to delete course.');
+    }
+  }
   /// Deletes a specific video.
   Future<void> deleteVideo({required String courseId, required String subjectId, required String chapterId, required String videoId}) async {
     try {
@@ -198,4 +256,5 @@ class AdminRepository {
       throw Exception('Failed to delete subject.');
     }
   }
+
 }

@@ -1,4 +1,5 @@
 // lib/presentation/pages/admin/admin_content_page.dart
+import 'package:eduzon/data/models/courses_moddel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../data/models/chapter_model.dart';
@@ -15,12 +16,13 @@ import 'admin_videos_list.dart';
 class AdminContentPage extends StatelessWidget {
   final SubjectModel subject;
   final ChapterModel chapter;
-  final String courseId = 'ojee_2025_2026_batch';
+  final String courseId ;
 
   const AdminContentPage({
     super.key,
     required this.subject,
     required this.chapter,
+    required this.courseId,
   });
 
   @override

@@ -1,3 +1,4 @@
+import 'package:eduzon/presentation/screens/Courses/manage_courses_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -48,13 +49,24 @@ class AdminDashboardScreen extends StatelessWidget {
                     child: ListTile(
                       leading: const Icon(Icons.video_library_outlined),
                       title: const Text('Manage Course Content'),
+                      subtitle: const Text('courses,subjects,chapters,videos, and PDFs'),
+                      onTap: (){
+                        // context.pushNamed(AppRoutes.AdminSubjects);
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => ManageCoursesScreen(),));
+                      },
+                    ),
+                  ),
+                  /*Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.video_library_outlined),
+                      title: const Text('Manage Course Content'),
                       subtitle: const Text('Add subjects, chapters, videos, and PDFs'),
                       onTap: (){
                         // context.pushNamed(AppRoutes.AdminSubjects);
                         Navigator.push(context, MaterialPageRoute(builder: (context) => AdminSubjectsPage(),));
                       },
                     ),
-                  ),
+                  ),*/
                   // Placeholder for future admin features
                   const Divider(),
                   Card(

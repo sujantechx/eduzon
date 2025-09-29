@@ -19,9 +19,7 @@ class SubjectsLoading extends SubjectState {}
 /// State when the subjects have been successfully loaded.
 class SubjectsLoaded extends SubjectState {
   final List<SubjectModel> subjects;
-
   const SubjectsLoaded(this.subjects);
-
   @override
   List<Object> get props => [subjects];
 }
@@ -29,9 +27,7 @@ class SubjectsLoaded extends SubjectState {
 /// State when an error occurs during an operation.
 class SubjectsError extends SubjectState {
   final String message;
-
   const SubjectsError(this.message);
-
   @override
   List<Object> get props => [message];
 }

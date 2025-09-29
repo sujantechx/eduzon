@@ -1,11 +1,11 @@
 // lib/presentation/screens/student/chapters_list_screen.dart
+import 'package:eduzon/data/repositories/admin_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../../data/models/chapter_model.dart';
 import '../../../data/models/subject_model.dart';
-import '../../../data/repositories/content_repository.dart';
 
 class ChapterPdf extends StatelessWidget {
   final SubjectModel subject;
@@ -15,8 +15,8 @@ class ChapterPdf extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(subject.title)),
-      body: StreamBuilder<List<ChapterModel>>(
-        stream: context.read<ContentRepository>().getChapters(subjectId: subject.id),
+      body: FutureBuilder<List<ChapterModel>>(
+        future: context.read<AdminRepository>().getChapters(subjectId: subject.id, courseId: ''),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

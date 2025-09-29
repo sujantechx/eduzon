@@ -49,3 +49,15 @@ class UpdateChapter extends ChaptersEvent {
   @override
   List<Object> get props => [courseId, subjectId, chapterId, newTitle];
 }
+class DeleteChapter extends ChaptersEvent {
+  final String courseId;
+  final String subjectId;
+  final String chapterId;
+  const DeleteChapter({
+    required this.courseId,
+    required this.subjectId,
+    required this.chapterId,
+  });
+  @override
+  List<Object> get props => [courseId, subjectId, chapterId];
+}
