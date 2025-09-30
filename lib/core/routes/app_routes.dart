@@ -42,4 +42,7 @@ class AppRoutes {
 
 // static const String AdminChapters = '/admin/manage-chapters';
 // We will add '/admin/manage-videos' here in the next step.
+  static const String publicCourses = '/'; // Make this the root
+  static const String courseDetail = '/course-detail';
+  static const String qrPayment = '/qr-payment';
 }

@@ -22,8 +22,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   // ADDED: Controllers for college and branch
-  final _collegeController = TextEditingController();
-  final _branchController = TextEditingController();
+  final _addressController = TextEditingController();
+  final _coursesIdhController = TextEditingController();
+  final _phoneController = TextEditingController();
 
   bool _isEditing = false;
 
@@ -31,8 +32,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
-    _collegeController.dispose();
-    _branchController.dispose();
+    _addressController.dispose();
+    _coursesIdhController.dispose();
+    _phoneController.dispose();
+
     super.dispose();
   }
 
@@ -40,8 +43,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void _initializeControllers(UserModel user) {
     _nameController.text = user.name;
     _emailController.text = user.email;
-    _collegeController.text = user.college;
-    _branchController.text = user.branch;
+    _addressController.text = user.address;
+    _coursesIdhController.text=user.courseId;
+    _phoneController.text=user.phone as String;
   }
 
   // This method calls the cubit to save the updated profile data.
@@ -50,8 +54,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context.read<AuthCubit>().updateProfile(
         name: _nameController.text.trim(),
         // email: _emailController.text.trim(),
-        college: _collegeController.text.trim(),
-        branch: _branchController.text.trim(),
+        address: _addressController.text.trim(),
+        courseId: _coursesIdhController.text.trim(),
+        phone: _phoneController.text.trim(), college: '', branch: '',
+
       );
       // Hide the form after saving
       setState(() => _isEditing = false);
@@ -131,9 +137,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           Text('Email: ${user.email}'),
                           const SizedBox(height: 8),
                           // ADDED: Display college and branch
-                          Text('College: ${user.college}'),
-                          const SizedBox(height: 8),
-                          Text('Branch: ${user.branch}'),
+                          Text('Address: ${user.address}'),
+                          Text('Course ID: ${user.courseId}'),
+                          Text('Phone: ${user.phone}'),
                           const SizedBox(height: 8),
                           Text('Role: ${user.role}'),
                           const SizedBox(height: 8),
@@ -173,23 +179,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 16),
                       // ADDED: Form fields for college and branch
                       TextFormField(
-                        controller: _collegeController,
+                        controller: _addressController,
                         decoration:  InputDecoration(
-                            labelText: 'College',
+                            labelText: 'Address',
                             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.grey)),
                             focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.blue))
                         ),
-                        validator: (v) => v!.isEmpty ? 'College cannot be empty' : null,
+                        validator: (v) => v!.isEmpty ? 'Address cannot be empty' : null,
                       ),
                       const SizedBox(height: 16),
                       TextFormField(
-                        controller: _branchController,
+                        controller: _phoneController,
                         decoration:  InputDecoration(
-                            labelText: 'Branch',
+                            labelText: 'Phone',
                             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.grey)),
                             focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.blue))
                         ),
-                        validator: (v) => v!.isEmpty ? 'Branch cannot be empty' : null,
+                        validator: (v) => v!.isEmpty ? 'Phone cannot be empty' : null,
                       ),
                       const SizedBox(height: 16),
                       Row(

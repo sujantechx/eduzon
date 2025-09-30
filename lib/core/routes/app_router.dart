@@ -8,7 +8,10 @@ import '../../data/models/pdf_model.dart';
 import '../../data/models/subject_model.dart';
 import '../../logic/auth/auth_bloc.dart';
 import '../../logic/auth/auth_state.dart';
+import '../../presentation/screens/Courses/course_detail_page.dart';
 import '../../presentation/screens/Courses/manage_courses_screen.dart';
+import '../../presentation/screens/Courses/public_courses_screen.dart';
+import '../../presentation/screens/Courses/qr_payment_screen.dart';
 import '../../presentation/screens/admin/admin_dashboard_screen.dart';
 import '../../presentation/screens/admin/admin_chapters_page.dart';
 import '../../presentation/screens/admin/admin_content_page.dart';
@@ -42,7 +45,7 @@ class AppRouter {
       routes: [
         GoRoute(path: AppRoutes.splash, builder: (context, state) => const SplashScreen()),
         GoRoute(path: AppRoutes.login, builder: (context, state) => const LoginScreen()),
-        GoRoute(path: AppRoutes.register, builder: (context, state) => const RegisterScreen()),
+        GoRoute(path: AppRoutes.register, builder: (context, state) => const RegisterScreen(courseId: '',)),
         GoRoute(path: AppRoutes.pendingApproval, builder: (context, state) => const PendingApprovalScreen()),
         GoRoute(path: AppRoutes.adminDashboard, builder: (context, state) => const AdminDashboardScreen()),
         GoRoute(path: AppRoutes.manageStudents, builder: (context, state) => const ManageStudentsScreen()),
@@ -169,6 +172,24 @@ class AppRouter {
             return PdfViewerScreen(url: url); // Added route for PdfViewerScreen
           },
         ),
+        GoRoute(
+          path: AppRoutes.courseDetail,
+          builder: (context, state) {
+            final course = state.extra as CoursesModel;
+            return CourseDetailPage(course: course);
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.qrPayment,
+          builder: (context, state) {
+            final course = state.extra as CoursesModel;
+            return QrPaymentScreen(course: course);
+          },
+        ),
+        GoRoute(
+          path: AppRoutes.publicCourses,
+          builder: (context, state) => const PublicCoursesScreen(),
+        ),
 
         // GoRoute(
         //   path: AppRoutes.adminPdfViewer,
@@ -279,14 +300,30 @@ class AppRouter {
           }
         } else if (authState is AuthError) {
           // Handle AuthError for registration or unapproved accounts
-          if (authState.message.contains('Registration successful') || authState.message.contains('Account not approved')) {
+          if (authState.message.contains('Registration successful') ||
+              authState.message.contains('Account not approved')) {
             if (currentLocation != AppRoutes.pendingApproval) {
-              developer.log('Redirecting to pendingApproval due to registration or unapproved account');
+              developer.log(
+                  'Redirecting to pendingApproval due to registration or unapproved account');
               return AppRoutes.pendingApproval;
             }
           } else {
-            developer.log('AuthError state: ${authState.message}, staying on current route');
+            developer.log('AuthError state: ${authState
+                .message}, staying on current route');
             return null;
+          }
+        }else { // Logic for Logged-Out User
+          // No redirect is needed if they are already on the public pages
+          // or trying to log in/register.
+          final isPublicOrAuthRoute =
+              currentLocation == AppRoutes.publicCourses ||
+                  currentLocation == AppRoutes.courseDetail ||
+                  currentLocation == AppRoutes.qrPayment ||
+                  currentLocation == AppRoutes.login ||
+                  currentLocation == AppRoutes.register;
+
+          if (!isPublicOrAuthRoute) {
+            return AppRoutes.publicCourses; // Default to public courses
           }
         }
 
