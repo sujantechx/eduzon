@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:eduzon/data/models/courses_moddel.dart';
 import 'package:eduzon/data/models/user_model.dart';
+import 'package:eduzon/presentation/screens/admin/manage_question.dart';
+import 'package:eduzon/presentation/screens/student/test_subjects.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:developer' as developer;
@@ -30,6 +32,8 @@ import '../../presentation/screens/student/pdf_list_screen.dart';
 import '../../presentation/screens/student/pdf_vewer_screen.dart';
 import '../../presentation/screens/student/subject_pdf.dart';
 import '../../presentation/screens/student/subjects_list_screen.dart';
+import '../../presentation/screens/student/test_chapter.dart';
+import '../../presentation/screens/student/test_screen.dart';
 import '../../presentation/screens/student/video_list_screen.dart';
 import '../../presentation/widgets/video_player_widget.dart';
 import '../enums/screen_mode.dart';
@@ -104,6 +108,16 @@ class AppRouter {
           },
         ),
         GoRoute(
+          path: AppRoutes.pdfList,
+          builder: (context, state) {
+            final data = state.extra as Map<String, dynamic>;
+            final subject = data['subject'] as SubjectModel;
+            final chapter = data['chapter'] as ChapterModel;
+            final coursesId= data['courseId'] as String;
+            return PdfListScreen(subject: subject, chapter: chapter, courseId: coursesId,);
+          },
+        ),
+        GoRoute(
           path: AppRoutes.chaptersList,
           builder: (context, state) {
             // Correctly cast the extra object as a Map
@@ -122,16 +136,7 @@ class AppRouter {
             return ChapterPdf(subject: subject,courseId: courseId);
           },
         ),
-        GoRoute(
-          path: AppRoutes.pdfList,
-          builder: (context, state) {
-            final data = state.extra as Map<String, dynamic>;
-            final subject = data['subject'] as SubjectModel;
-            final chapter = data['chapter'] as ChapterModel;
-            final coursesId= data['courseId'] as String;
-            return PdfListScreen(subject: subject, chapter: chapter, courseId: coursesId,);
-          },
-        ),
+
         GoRoute(
           path: AppRoutes.videosList,
           builder: (context, state) {
@@ -141,6 +146,17 @@ class AppRouter {
             final coursesId= data['courseId'] as String;
             return VideosListScreen(subject: subject, chapter: chapter, courseId: coursesId);
           },
+        ),
+        GoRoute(path: AppRoutes.managesQuestions,
+        builder: (context,state){
+          final courseId=state.extra as String;
+          final subjectId=state.extra as String;
+          final chapterId=state.extra as String;
+          if(courseId.isNotEmpty && subjectId.isNotEmpty && chapterId.isNotEmpty){
+            return ManageQuestion(courseId: courseId, subjectId: subjectId, chapterId: chapterId,);
+          }
+         return ManageQuestion(courseId: courseId, subjectId: subjectId, chapterId: chapterId,);
+        }
         ),
         GoRoute(
           path: '${AppRoutes.videoPlayer}/:videoId',
@@ -170,6 +186,20 @@ class AppRouter {
             return PdfViewerScreen(url: url);
           },
         ),
+        GoRoute(path: AppRoutes.testChapter,builder: (context,state){
+          final data=state.extra as Map<String,dynamic>;
+          final subject=data['subject'] as SubjectModel;
+          final courseId=data['courseId'] as String;
+          return TestChapter(subject: subject,courseId: courseId);
+        }),
+         GoRoute(path: AppRoutes.testScreen,builder: (context,state){
+          final data=state.extra as Map<String,dynamic>;
+          final subject=data['subject'] as SubjectModel;
+          final courseId=data['courseId'] as String;
+          final chapter=data['chapter'] as ChapterModel;
+          return TestScreen(courseId: courseId,subjectId: subject.id,chapterId: chapter ,);
+        }),
+
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) {
             return DashboardShell(navigationShell: navigationShell);
@@ -185,6 +215,9 @@ class AppRouter {
                 GoRoute(path: AppRoutes.subjectPDF, builder: (context, state) => const SubjectPdf()),
               ],
             ),
+            StatefulShellBranch(routes: [
+             GoRoute(path: AppRoutes.testSubject,builder: (context,state)=> const TestSubjects()),
+            ]),
             StatefulShellBranch(
               routes: [
                 GoRoute(path: AppRoutes.profile, builder: (context, state) => const ProfileScreen()),
@@ -255,7 +288,10 @@ class AppRouter {
                 currentLocation.startsWith(AppRoutes.pdfList) ||
                 currentLocation.startsWith(AppRoutes.videosList) ||
                 currentLocation.startsWith(AppRoutes.videoPlayer) ||
-                currentLocation.startsWith(AppRoutes.pdfViewer);
+                currentLocation.startsWith(AppRoutes.pdfViewer)||
+                currentLocation.startsWith(AppRoutes.testScreen)||
+                currentLocation.startsWith(AppRoutes.testChapter)||
+                currentLocation.startsWith(AppRoutes.testSubject);
 
             if (!isStudentRoute) {
               return AppRoutes.subjectsList;

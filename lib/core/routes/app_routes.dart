@@ -17,6 +17,7 @@ class AppRoutes {
   // These are the entry points for the bottom navigation bar.
   static const String subjectsList = '/subjects'; // The first tab and main student screen.
   static const String subjectPDF = '/subjectPDF';
+  static const String  testSubject = '/testSubject';
   static const String profile = '/profile';
 
   //  Student Content Drill-Down
@@ -27,7 +28,8 @@ class AppRoutes {
   static const String pdfList = '/pdf-list';
   static const String videosList = '/videos-list';
   static const String videoPlayer = '/video-player';
-
+  static const String  testScreen = '/testScreen';
+  static const String  testChapter = '/testChapter';
 
   // Admin Panel Routes
 
@@ -39,6 +41,7 @@ class AppRoutes {
   static const String adminVideoPlayer = '/admin/video-player';
   static const String adminPdfViewer = '/admin/pdf-viewer';
   static const String manageCourses = '/admin/manage-courses';
+  static const String managesQuestions = '/admin/manage-questions';
 
 // static const String AdminChapters = '/admin/manage-chapters';
 // We will add '/admin/manage-videos' here in the next step.

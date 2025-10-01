@@ -98,7 +98,6 @@ class DashboardScreen extends StatelessWidget {
     return Scaffold(
       // The body is simply the navigationShell, which GoRouter populates with the correct screen.
       body: navigationShell,
-
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: navigationShell.currentIndex,
@@ -111,6 +110,7 @@ class DashboardScreen extends StatelessWidget {
             icon: Icon(Icons.picture_as_pdf),
             label: 'Notes',
           ),
+          BottomNavigationBarItem(icon: Icon(Icons.quiz), label: 'Test'),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',

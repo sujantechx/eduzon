@@ -1,5 +1,6 @@
 import 'package:eduzon/data/repositories/admin_repository.dart';
 import 'package:eduzon/logic/Courses/courses_cubit.dart';
+import 'package:eduzon/logic/test/quiz_cubit.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ import 'firebase_options.dart';
 import 'logic/auth/admin_cubit.dart';
 import 'data/repositories/auth_repository.dart';
 import 'logic/auth/auth_bloc.dart';
+import 'logic/test/question_cubit.dart';
 import 'logic/theme/theme_cubit.dart';
 import 'logic/theme/theme_state.dart'; // Added import for ContentRepository required by ContentCubit
 
@@ -71,6 +73,7 @@ class MyApp extends StatelessWidget {
 
     final authCubit = AuthCubit(authRepository: authRepository);
     final adminCubit = AdminCubit(authRepository: authRepository);
+    final testCubit = CoursesCubit(adminRepository: AdminRepository());
     final themeCubit = ThemeCubit();
 
     return MultiProvider(
@@ -80,6 +83,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (context) => authCubit..init()),
         BlocProvider(create: (context) => adminCubit),
         BlocProvider(create: (context) => themeCubit),
+        BlocProvider(create: (context)=>testCubit),
         // ✅ 3. Provide the AdminRepository that CoursesCubit depends on.
         Provider<AdminRepository>(
           create: (_) => AdminRepository(),
@@ -91,6 +95,16 @@ class MyApp extends StatelessWidget {
             adminRepository: context.read<AdminRepository>(),
           ),
         ),
+        BlocProvider<QuestionCubit>(
+          create: (context) => QuestionCubit(
+            context.read<AdminRepository>(),
+          ),
+        ),
+        BlocProvider<QuizCubit>(
+          create: (context) => QuizCubit(
+            context.read<AdminRepository>()
+            , context.read<AuthCubit>(),
+        ),)
 
 
       ],
