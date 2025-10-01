@@ -16,9 +16,9 @@ class SubjectModel {
   factory SubjectModel.fromSnapshot(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return SubjectModel(
-      id: doc.id,
-      title: data['title'] ?? 'No Title',
-      description: data['description']??'');
+        id: doc.id,
+        title: data['title'] ?? 'No Title',
+        description: data['description'] ?? '');
   }
 }
 

@@ -231,7 +231,8 @@ class AuthRepository {
     required String uid,
     required String name,
     required String address,
-    required String courseId, required String college, required String branch,
+    required String courseId,
+    required String phone,
   }) async {
     try {
       final updateData = const UserModel(uid: '', name: '', email: '', address: '', courseId: '',phone:'', paymentId: '')

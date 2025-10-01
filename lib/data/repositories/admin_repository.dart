@@ -92,6 +92,10 @@ class AdminRepository {
       await _coursesRef().add({
         'title': title,
         'description': description,
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
+        'price': 0, // Default price
+        'imageUrl': null, // Default image URL
       });
     } catch (e) {
       print("Error adding course: $e");

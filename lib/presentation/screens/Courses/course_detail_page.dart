@@ -8,8 +8,9 @@ import '../../../data/models/courses_moddel.dart';
 class CourseDetailPage extends StatelessWidget {
   // This page will receive the course details from the previous screen.
   final CoursesModel course;
+  final String? imageUrl;
 
-  const CourseDetailPage({super.key, required this.course});
+  const CourseDetailPage({super.key, required this.course, this.imageUrl});
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +23,20 @@ class CourseDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Container(
+              height: 200,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                image: DecorationImage(
+                  image: NetworkImage(
+                    course.imageUrl ??
+                        'https://via.placeholder.com/150', // Fallback image
+                  ), fit: BoxFit.fill, ),
+
+                ),
+              ),
+
             // Course Title
             Text(
               course.title,

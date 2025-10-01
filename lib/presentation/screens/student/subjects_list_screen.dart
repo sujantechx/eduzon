@@ -1,4 +1,5 @@
 // lib/presentation/screens/student/subjects_list_screen.dart
+import 'package:eduzon/data/models/user_model.dart';
 import 'package:eduzon/data/repositories/admin_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,17 +7,27 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/routes/app_routes.dart';
 import '../../../data/models/subject_model.dart';
+import '../../../logic/auth/auth_bloc.dart';
+import '../../../logic/auth/auth_state.dart';
 
 class SubjectsListScreen extends StatelessWidget {
   const SubjectsListScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final authState = context.watch<AuthCubit>().state;
+
+    if (authState is! Authenticated) {
+      return const Center(child: CircularProgressIndicator()); // Handle loading/unauthenticated states
+    }
+
+    final user = authState.userModel;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Subjects Video')),
       body: FutureBuilder<List<SubjectModel>>(
         // Listen to the stream of subjects from the repository.
-        future: context.read<AdminRepository>().getSubjects(courseId: ''),
+        future: context.read<AdminRepository>().getSubjects(courseId: user.courseId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -41,7 +52,10 @@ class SubjectsListScreen extends StatelessWidget {
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
                     // Navigate to the chapters screen, passing the selected subject.
-                    context.push(AppRoutes.chaptersList, extra: subject);
+                    context.push(AppRoutes.chaptersList, extra:{
+                      'subject': subject,
+                      'courseId': UserModel.currentUser!.courseId!,
+                    });
                   },
                 ),
               );

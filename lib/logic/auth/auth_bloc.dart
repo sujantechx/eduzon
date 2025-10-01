@@ -29,7 +29,6 @@ class AuthCubit extends Cubit<AuthState> {
   }
   // lib/logic/auth/auth_cubit.dart
 
-// ... inside your AuthCubit class ...
 
   Future<void> register({
     required String email,
@@ -106,12 +105,7 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-// lib/logic/auth/auth_cubit.dart
 
-
-// lib/logic/auth/auth_cubit.dart
-
-// ... inside your AuthCubit class ...
   Future<void> updateProfile({
     required String name,
     // required String email, // REMOVED
@@ -129,8 +123,7 @@ class AuthCubit extends Cubit<AuthState> {
         uid: user.uid,
         name: name,
         // email: email, // REMOVED
-        college: college,
-        branch: branch, address: '', courseId: '',
+        address: '', courseId: '', phone: '',
       );
 
       final updatedUserModel = user.copyWith(

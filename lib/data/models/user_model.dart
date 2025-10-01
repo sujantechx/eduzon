@@ -17,6 +17,8 @@ class UserModel extends Equatable {
   final String phone;
   final String paymentId;
 
+  static var currentUser;
+
   const UserModel({
     required this.uid,
     required this.name,
@@ -108,7 +110,7 @@ class UserModel extends Equatable {
     String? activeToken,
     Timestamp? createdAt,
     Timestamp? lastLogin,
-    num? phone,
+    String? phone,
     String? paymentId,
   }) {
     return UserModel(

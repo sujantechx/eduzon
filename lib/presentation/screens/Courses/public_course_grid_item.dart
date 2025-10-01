@@ -20,10 +20,12 @@ class PublicCourseGridItem extends StatelessWidget {
     return Card(
       clipBehavior: Clip.antiAlias,
       elevation: 4.0,
+
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: onTap, // Trigger the navigation callback
         child: GridTile(
+
           // You can add a course image here later using Stack
           footer: GridTileBar(
             backgroundColor: Colors.black54,
@@ -38,9 +40,16 @@ class PublicCourseGridItem extends StatelessWidget {
             ),
           ),
           child: Container(
-            color: Colors.blue.shade100, // Placeholder color
-            // TODO: Add a course thumbnail image here
-            // child: Image.network(course.thumbnailUrl, fit: BoxFit.cover),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade100, // Placeholder color
+              image: DecorationImage(
+                image: course.imageUrl != null
+                    ? NetworkImage(course.imageUrl!)
+                    : const AssetImage('assets/images/course_placeholder.png') as ImageProvider,
+                fit: BoxFit.fill,
+              ),
+            ),
+
           ),
         ),
       ),

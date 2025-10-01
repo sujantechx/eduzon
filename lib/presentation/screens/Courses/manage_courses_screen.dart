@@ -1,5 +1,6 @@
 // lib/presentation/screens/admin/manage_courses_screen.dart
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eduzon/core/routes/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -161,6 +162,10 @@ class ManageCoursesScreen extends StatelessWidget {
     final formKey = GlobalKey<FormState>();
     final titleController = TextEditingController(text: course?.title ?? '');
     final descController = TextEditingController(text: course?.description ?? '');
+    final priceController =TextEditingController(text: course?.price.toString() ?? '');
+    final imageUrlController =TextEditingController(text: course?.imageUrl ?? '');
+    final createdAtController =TextEditingController(text: course?.createdAt.toDate().toString() ?? '');
+    final updatedAtController =TextEditingController(text: course?.updatedAt.toDate().toString() ?? '');
 
     showDialog(
       context: context,
@@ -182,6 +187,26 @@ class ManageCoursesScreen extends StatelessWidget {
                   decoration: const InputDecoration(labelText: 'Course Description'),
                   validator: (value) => value!.isEmpty ? 'Description cannot be empty' : null,
                 ),
+               TextField(
+                 controller: priceController,
+                  decoration: const InputDecoration(labelText: 'Course Price'),
+                  keyboardType: TextInputType.number,
+               ),
+                TextField(
+                  controller: imageUrlController,
+                    decoration: const InputDecoration(labelText: 'Course Image URL'),
+                    keyboardType: TextInputType.url,
+                ),
+                TextField(
+                  controller: createdAtController,
+                  decoration: const InputDecoration(labelText: 'Created At'),
+                  readOnly: true,
+                ),
+                TextField(
+                  controller: updatedAtController,
+                  decoration: const InputDecoration(labelText: 'Updated At'),
+                  readOnly: true,
+                ),
               ],
             ),
           ),
@@ -197,6 +222,9 @@ class ManageCoursesScreen extends StatelessWidget {
                       data: {
                         'title': titleController.text.trim(),
                         'description': descController.text.trim(),
+                        'price': num.tryParse(priceController.text.trim()) ?? 0,
+                        'imageUrl': imageUrlController.text.trim(),
+                        'updatedAt': FieldValue.serverTimestamp(),
                       },
                     );
                   } else {

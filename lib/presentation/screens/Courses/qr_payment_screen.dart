@@ -32,7 +32,7 @@ class QrPaymentScreen extends StatelessWidget {
 
             // Your QR Code Image
             // Make sure you have 'payment_qr.png' in your 'assets/images/' folder.
-            Image.asset('assets/images/payment_qr.png'),
+            Image.asset('assets/images/payment_qr.jpg'),
             const SizedBox(height: 20),
 
             // More detailed instructions

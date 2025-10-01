@@ -9,14 +9,15 @@ import '../../../data/models/subject_model.dart';
 
 class ChaptersListScreen extends StatelessWidget {
   final SubjectModel subject;
-  const ChaptersListScreen({super.key, required this.subject});
+  final String courseId ; // You can set this dynamically if needed.
+  const ChaptersListScreen({super.key, required this.subject, required this.courseId});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text(subject.title)),
       body: FutureBuilder<List<ChapterModel>>(
-        future: context.read<AdminRepository>().getChapters(subjectId: subject.id, courseId: ''),
+        future: context.read<AdminRepository>().getChapters(subjectId: subject.id, courseId: ""),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
