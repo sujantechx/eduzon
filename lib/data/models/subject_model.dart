@@ -15,10 +15,15 @@ class SubjectModel {
   // Factory to create a SubjectModel from a Firestore document snapshot.
   factory SubjectModel.fromSnapshot(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+    if (data == null) {
+      // Handle case where data is null
+      throw Exception("Subject document data is null");
+    }
     return SubjectModel(
-        id: doc.id,
-        title: data['title'] ?? 'No Title',
-        description: data['description'] ?? '');
+      id: doc.id,
+      title: (data['title'] as String?) ?? 'No Title',
+      description: (data['description'] as String?) ?? '',
+    );
   }
 }
 

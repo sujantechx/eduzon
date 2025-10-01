@@ -110,7 +110,7 @@ class AuthCubit extends Cubit<AuthState> {
     required String name,
     // required String email, // REMOVED
     required String college,
-    required String branch, required String address, required String courseId, required String phone,
+    required String branch, required String address, required String courseName, required String phone,
   }) async {
     if (state is! Authenticated) return;
 
@@ -123,7 +123,7 @@ class AuthCubit extends Cubit<AuthState> {
         uid: user.uid,
         name: name,
         // email: email, // REMOVED
-        address: '', courseId: '', phone: '',
+        address: '', courseName: '', phone: '', courseId: '', courseTitle: '',
       );
 
       final updatedUserModel = user.copyWith(

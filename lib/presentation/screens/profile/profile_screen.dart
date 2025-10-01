@@ -25,6 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _coursesNameController = TextEditingController();
 
   bool _isEditing = false;
 
@@ -33,6 +34,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _nameController.dispose();
     _addressController.dispose();
     _phoneController.dispose();
+    _coursesNameController.dispose();
     super.dispose();
   }
 
@@ -40,6 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _nameController.text = user.name;
     _addressController.text = user.address;
     _phoneController.text = user.phone;
+    _coursesNameController.text = user.courseId;
   }
 
   Future<void> _updateProfile() async {
@@ -49,9 +52,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         name: _nameController.text.trim(),
         address: _addressController.text.trim(),
         phone: _phoneController.text.trim(),
-        courseId: user.courseId,
         college: '',
         branch: '',
+        courseName: _coursesNameController.text.trim(),
       );
       setState(() => _isEditing = false);
     }
@@ -113,26 +116,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           const SizedBox(height: 8),
                           Text('Address: ${user.address}'),
                           Text('Phone: ${user.phone}'),
-                          Text('Role: ${user.role}'),
-                          const SizedBox(height: 8),
-                          Text('Status: ${user.status}'),
+                          // Text(' ${user.role}'),
+                          // const SizedBox(height: 8),
+                          // Text('Status: ${user.status}'),
                           const SizedBox(height: 8),
                           // Correctly using FutureBuilder
                           FutureBuilder<DocumentSnapshot>(
                             future: FirebaseFirestore.instance.collection('courses').doc(user.courseId).get(),
                             builder: (context, snapshot) {
+                              String courseName = 'Loading...';
                               if (snapshot.connectionState == ConnectionState.waiting) {
-                                return const Text('Course Name: Loading...');
+                                courseName = 'Loading...';
+                              } else if (snapshot.hasError || !snapshot.hasData || !snapshot.data!.exists) {
+                                courseName = 'Not Found';
+                              } else {
+                                final courseData = snapshot.data!.data() as Map<String, dynamic>;
+                                courseName = courseData['title'] ?? 'Unknown';
                               }
-                              if (snapshot.hasError || !snapshot.hasData || !snapshot.data!.exists) {
-                                return const Text('Course Name: Not Found');
-                              }
-                              final courseData = snapshot.data!.data() as Map<String, dynamic>;
-                              // Change 'name' to 'title'
-                              return Text('Course Name: ${courseData['title']}');
+                              return Text('Course Name: $courseName');
                             },
-                          ),                          const SizedBox(height: 8),
-                          Text('Course id: ${user.courseId}'),
+                          ),
+                          const SizedBox(height: 8),
+                          // Text('Course id: ${user.courseId}'),
                         ],
                       ),
                     ),
@@ -185,15 +190,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         validator: (v) => v!.isEmpty ? 'Phone cannot be empty' : null,
                       ),
                       const SizedBox(height: 16),
-                      TextFormField(
-                        decoration: InputDecoration(
-                          labelText: 'Course ID',
-                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.grey)),
-                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.blue)),
-                        ),
-                        controller: TextEditingController(text: user.courseId),
-                        readOnly: true,
-                      ),
+                      // TextFormField(
+                      //   decoration: InputDecoration(
+                      //     labelText: 'Course Name',
+                      //     enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.grey)),
+                      //     focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.blue)),
+                      //   ),
+                      //   controller:_coursesNameController,
+                      //   readOnly: true,
+                      // ),
                       const SizedBox(height: 24),
                       Row(
                         children: [
@@ -228,6 +233,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
+
+
 /*import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

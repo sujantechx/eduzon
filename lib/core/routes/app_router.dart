@@ -106,17 +106,20 @@ class AppRouter {
         GoRoute(
           path: AppRoutes.chaptersList,
           builder: (context, state) {
-            final data = state.extra as Map<String, dynamic>;
-            final subject = data['subject'] as SubjectModel;
-            final courseId = data['courseId'] as String;
+            // Correctly cast the extra object as a Map
+            final extra = state.extra as Map<String, dynamic>;
+            final subject = extra['subject'] as SubjectModel;
+            final courseId = extra['courseId'] as String;
             return ChaptersListScreen(subject: subject, courseId: courseId);
           },
         ),
         GoRoute(
           path: AppRoutes.chapterPDF,
           builder: (context, state) {
-            final subject = state.extra as SubjectModel;
-            return ChapterPdf(subject: subject);
+           final extra=state.extra as Map<String,dynamic>;
+           final subject=extra['subject'] as SubjectModel;
+           final courseId=extra['courseId'] as String;
+            return ChapterPdf(subject: subject,courseId: courseId);
           },
         ),
         GoRoute(
@@ -125,7 +128,8 @@ class AppRouter {
             final data = state.extra as Map<String, dynamic>;
             final subject = data['subject'] as SubjectModel;
             final chapter = data['chapter'] as ChapterModel;
-            return PdfListScreen(subject: subject, chapter: chapter);
+            final coursesId= data['courseId'] as String;
+            return PdfListScreen(subject: subject, chapter: chapter, courseId: coursesId,);
           },
         ),
         GoRoute(
@@ -134,7 +138,8 @@ class AppRouter {
             final data = state.extra as Map<String, dynamic>;
             final subject = data['subject'] as SubjectModel;
             final chapter = data['chapter'] as ChapterModel;
-            return VideosListScreen(subject: subject, chapter: chapter);
+            final coursesId= data['courseId'] as String;
+            return VideosListScreen(subject: subject, chapter: chapter, courseId: coursesId);
           },
         ),
         GoRoute(

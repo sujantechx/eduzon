@@ -6,17 +6,25 @@ import 'package:go_router/go_router.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../../data/models/chapter_model.dart';
 import '../../../data/models/subject_model.dart';
+import '../../../logic/auth/auth_bloc.dart';
+import '../../../logic/auth/auth_state.dart';
 
 class ChapterPdf extends StatelessWidget {
   final SubjectModel subject;
-  const ChapterPdf({super.key, required this.subject});
-
+  final String courseId; // ✅ CORRECTED: Add courseId parameter
+  const ChapterPdf({super.key, required this.subject, required this.courseId});
   @override
   Widget build(BuildContext context) {
+    final authState = context.watch<AuthCubit>().state;
+    if (authState is! Authenticated) {
+      return const Center(child: CircularProgressIndicator()); // Handle loading/unauthenticated states
+    }
+    final user = authState.userModel;
     return Scaffold(
       appBar: AppBar(title: Text(subject.title)),
       body: FutureBuilder<List<ChapterModel>>(
-        future: context.read<AdminRepository>().getChapters(subjectId: subject.id, courseId: ''),
+        // ✅ CORRECTED: Use the courseId parameter from the constructor.
+        future: context.read<AdminRepository>().getChapters(subjectId: subject.id, courseId: user.courseId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -40,14 +48,23 @@ class ChapterPdf extends StatelessWidget {
                   title: Text(chapter.title, style: const TextStyle(fontWeight: FontWeight.bold)),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
-                    // Navigate to the videos screen, passing both the subject and chapter.
-                    context.push(
-                      AppRoutes.pdfList,
-                      extra: {
-                        'subject': subject,
-                        'chapter': chapter,
-                      },
-                    );                  },
+                    // Get the user from the AuthCubit
+                    final authState = context.read<AuthCubit>().state;
+                    if (authState is Authenticated) {
+                      final user = authState.userModel;
+                      final courseId = user.courseId;
+
+                      // ✅ CORRECTED: Pass the subject and courseId inside a Map
+                      context.push(
+                        AppRoutes.pdfList,
+                        extra: {
+                          'subject': subject,
+                          'courseId': courseId,
+                          'chapter': chapter,
+                        },
+                      );
+                    }
+                  },
                 ),
               );
             },

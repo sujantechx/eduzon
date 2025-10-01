@@ -51,11 +51,21 @@ class SubjectsListScreen extends StatelessWidget {
                   title: Text(subject.title, style: const TextStyle(fontWeight: FontWeight.bold)),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {
-                    // Navigate to the chapters screen, passing the selected subject.
-                    context.push(AppRoutes.chaptersList, extra:{
-                      'subject': subject,
-                      'courseId': UserModel.currentUser!.courseId!,
-                    });
+                    // Get the user from the AuthCubit
+                    final authState = context.read<AuthCubit>().state;
+                    if (authState is Authenticated) {
+                      final user = authState.userModel;
+                      final courseId = user.courseId;
+
+                      // ✅ CORRECTED: Pass the subject and courseId inside a Map
+                      context.push(
+                        AppRoutes.chaptersList,
+                        extra: {
+                          'subject': subject,
+                          'courseId': courseId,
+                        },
+                      );
+                    }
                   },
                 ),
               );

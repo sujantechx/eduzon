@@ -1,4 +1,5 @@
 // lib/presentation/screens/student/videos_list_screen.dart
+
 import 'package:eduzon/data/repositories/admin_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,18 +8,37 @@ import '../../../core/routes/app_routes.dart';
 import '../../../data/models/chapter_model.dart';
 import '../../../data/models/subject_model.dart';
 import '../../../data/models/video_model.dart';
+import '../../../logic/auth/auth_bloc.dart';
+import '../../../logic/auth/auth_state.dart';
 
 class VideosListScreen extends StatelessWidget {
+  final String courseId;
   final SubjectModel subject;
   final ChapterModel chapter;
-  const VideosListScreen({super.key, required this.subject, required this.chapter});
+  const VideosListScreen({
+    super.key,
+    required this.subject,
+    required this.chapter,
+    required this.courseId,
+  });
 
   @override
   Widget build(BuildContext context) {
+    // You're correctly handling the authState here, which is great.
+    final authState = context.watch<AuthCubit>().state;
+    if (authState is! Authenticated) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return Scaffold(
       appBar: AppBar(title: Text(chapter.title)),
       body: FutureBuilder<List<VideoModel>>(
-        future: context.read<AdminRepository>().getVideos(subjectId: subject.id, chapterId: chapter.id, courseId: ''),
+        // ✅ CORRECTED: Use the courseId parameter from the constructor.
+        future: context.read<AdminRepository>().getVideos(
+          subjectId: subject.id,
+          chapterId: chapter.id,
+          courseId: courseId, // <-- This is the fix
+        ),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -27,7 +47,9 @@ class VideosListScreen extends StatelessWidget {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No videos found for this chapter.'));
+            return const Center(
+              child: Text('No videos found for this chapter.'),
+            );
           }
 
           final videos = snapshot.data!;
@@ -55,5 +77,3 @@ class VideosListScreen extends StatelessWidget {
     );
   }
 }
-
-

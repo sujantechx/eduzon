@@ -18,7 +18,6 @@ import 'data/repositories/auth_repository.dart';
 import 'logic/auth/auth_bloc.dart';
 import 'logic/theme/theme_cubit.dart';
 import 'logic/theme/theme_state.dart'; // Added import for ContentRepository required by ContentCubit
-import 'data/repositories/pdf_repository.dart';
 
 // Main entry point for the Student Zone app
 // Main entry point for the Student Zone app
@@ -93,9 +92,6 @@ class MyApp extends StatelessWidget {
           ),
         ),
 
-        Provider<PdfRepository>(
-          create: (_) => PdfRepository(),
-        ),
 
       ],
 

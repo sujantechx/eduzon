@@ -1,3 +1,4 @@
+import 'package:eduzon/data/repositories/admin_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -5,12 +6,12 @@ import '../../../core/routes/app_routes.dart';
 import '../../../data/models/chapter_model.dart';
 import '../../../data/models/pdf_model.dart';
 import '../../../data/models/subject_model.dart';
-import '../../../data/repositories/pdf_repository.dart';
 
 class PdfListScreen extends StatelessWidget {
   final SubjectModel subject;
   final ChapterModel chapter;
-  const PdfListScreen({super.key, required this.subject, required this.chapter});
+  final String courseId;
+  const PdfListScreen({super.key, required this.subject, required this.chapter, required this.courseId});
 
   Future<void> _launchURL(String url, BuildContext context) async {
     final uri = Uri.parse(url);
@@ -27,9 +28,10 @@ class PdfListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text('PDFs for ${chapter.title}')),
-      body: StreamBuilder<List<PdfModel>>(
-        // This stream now correctly calls the updated repository method.
-        stream: context.read<PdfRepository>().getPdf(
+      body: // Replace StreamBuilder with FutureBuilder
+      FutureBuilder<List<PdfModel>>(
+        future: context.read<AdminRepository>().getPdfs(
+          courseId: courseId,
           subjectId: subject.id,
           chapterId: chapter.id,
         ),
@@ -54,11 +56,8 @@ class PdfListScreen extends StatelessWidget {
                 child: ListTile(
                   leading: const Icon(Icons.picture_as_pdf_rounded, color: Colors.deepPurple),
                   title: Text(pdf.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                  // ✅ Display the description in the subtitle.
-                  // subtitle: Text(pdf.desc),
                   trailing: const Icon(Icons.open_in_new),
                   onTap: () {
-                    // ✅ Use the 'link' property to launch the URL.
                     _launchURL(pdf.url, context);
                     Navigator.of(context).pushNamed(AppRoutes.pdfViewer, arguments: pdf.url);
                   },
@@ -67,7 +66,8 @@ class PdfListScreen extends StatelessWidget {
             },
           );
         },
-      ),
+      )
+
     );
   }
 }

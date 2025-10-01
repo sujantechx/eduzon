@@ -51,7 +51,8 @@ class AuthRepository {
         phone: phone,
         paymentId: paymentId,
         role: 'student',   // Default role
-        status: 'pending', // Default status
+        status: 'pending',
+        courseTitle: '', // Default status
       );
 
       // 3. Save the complete user model to Firestore
@@ -231,15 +232,16 @@ class AuthRepository {
     required String uid,
     required String name,
     required String address,
-    required String courseId,
-    required String phone,
+    required String courseTitle,
+    required String phone, required String courseName, required String courseId,
   }) async {
     try {
-      final updateData = const UserModel(uid: '', name: '', email: '', address: '', courseId: '',phone:'', paymentId: '')
+      final updateData = const UserModel(uid: '', name: '', email: '', address: '', courseTitle: '',phone:'', paymentId: '', courseId: '')
           .toFirestoreUpdate(
         name: name,
         address: address,
-        courseId: courseId,
+        courseTitle: courseTitle,
+        phone: phone,
       );
       await _firestore.collection('users').doc(uid).update(updateData);
     } catch (e) {

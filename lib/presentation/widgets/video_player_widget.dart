@@ -90,11 +90,6 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
               if (widget.mode == ScreenMode.student)
                 const Padding(
                   padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    'For your security, screenshots and screen recording are disabled for this content.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey),
-                  ),
                 )
             ],
           );

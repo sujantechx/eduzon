@@ -16,10 +16,11 @@ class UserModel extends Equatable {
   final Timestamp? lastLogin;
   final String phone;
   final String paymentId;
+  final String courseTitle;
 
   static var currentUser;
 
-  const UserModel({
+  const UserModel( {
     required this.uid,
     required this.name,
     required this.email,
@@ -32,6 +33,7 @@ class UserModel extends Equatable {
     this.activeToken,
     this.createdAt,
     this.lastLogin,
+    required this.courseTitle,
   });
 
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
@@ -49,6 +51,7 @@ class UserModel extends Equatable {
       lastLogin: data['lastLogin'] as Timestamp?,
       phone: data['phone'] as String? ?? '',
       paymentId: data['paymentId'] as String? ?? '',
+      courseTitle: data['courseTitle'] as String? ?? 'Unknown',
     );
   }
 
@@ -66,6 +69,7 @@ class UserModel extends Equatable {
       'lastLogin': lastLogin,
       'phone': phone,
       'paymentId': paymentId,
+      'courseTitle': courseTitle,
     };
   }
 
@@ -79,6 +83,7 @@ class UserModel extends Equatable {
     String? activeToken,
     String? phone,       // CORRECTED
     String? paymentId,
+    String? courseTitle,
   }) {
     final updates = <String, dynamic>{};
     if (name != null) updates['name'] = name.trim();
@@ -93,6 +98,7 @@ class UserModel extends Equatable {
     if (activeToken != null) updates['activeToken'] = activeToken;
     if (phone != null) updates['phone'] = phone;
     if (paymentId != null) updates['paymentId'] = paymentId;
+    if (courseTitle != null) updates['courseTitle'] = courseTitle;
     return updates;
   }
 
@@ -112,6 +118,7 @@ class UserModel extends Equatable {
     Timestamp? lastLogin,
     String? phone,
     String? paymentId,
+    String? courseTitle,
   }) {
     return UserModel(
       uid: uid,
@@ -126,12 +133,13 @@ class UserModel extends Equatable {
       lastLogin: lastLogin ?? this.lastLogin,
       phone: phone?.toString() ?? this.phone,
       paymentId: paymentId ?? this.paymentId,
+      courseTitle: courseTitle ?? this.courseTitle,
     );
   }
 
   @override
   List<Object?> get props => [
     uid, name, email, address, courseId, role, status,
-    activeToken, createdAt, lastLogin, phone, paymentId,
+    activeToken, createdAt, lastLogin, phone, paymentId, courseTitle
   ];
 }
