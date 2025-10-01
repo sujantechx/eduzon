@@ -39,8 +39,7 @@ dependencies:
   firebase_storage: ^13.0.1
   cloud_functions: ^6.0.1
   # For playing YouTube videos
-  youtube_player_flutter: ^9.0.0
-
+  youtube_player_flutter: ^9.1.2
   # For preventing screenshots and screen recording (Android & iOS)
   #  flutter_windowmanager: ^0.2.0
   vimeo_video_player: ^0.0.5
