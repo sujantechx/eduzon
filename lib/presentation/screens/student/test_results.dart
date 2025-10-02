@@ -9,13 +9,18 @@ import '../../../logic/test/quiz_cubit.dart'; // Assuming you have access to thi
 
 class QuizResultScreen extends StatelessWidget {
   final ResultModel result;
-  // You might need to pass the list of questions here to show the details
   final List<QuestionModel> questions;
+  final String courseId; // Add this
+  final String subjectId; // Add this
+  final String chapterId; // Add this
 
   const QuizResultScreen({
     Key? key,
     required this.result,
-    required this.questions, // Pass the questions list from QuizLoaded state
+    required this.questions,
+    required this.courseId, // Make it required
+    required this.subjectId, // Make it required
+    required this.chapterId, // Make it required
   }) : super(key: key);
 
   @override
@@ -85,19 +90,20 @@ class QuizResultScreen extends StatelessWidget {
             }).toList(),
             const SizedBox(height: 20),
             // Retake Test Button
-            ElevatedButton(
-              onPressed: () {
-                // Navigate back to the quiz screen
-                // or reload the QuizCubit with new questions
-                Navigator.of(context).pop();
-                context.read<QuizCubit>().loadQuestions(
-                  courseId: result.chapterId, // Use the correct IDs
-                  subjectId: '...',
-                  chapterId: '...',
-                );
-              },
-              child: const Text('Retake Test'),
-            ),
+             ElevatedButton(
+            onPressed: () {
+            // Pop the current results screen to go back to the chapter list.
+               Navigator.of(context).pop();
+            // Trigger the retest logic in the QuizCubit with the necessary IDs.
+            context.read<QuizCubit>().retest(
+            courseId: courseId,
+            subjectId: subjectId,
+            chapterId: chapterId,
+            );
+            },
+            child: const Text('Retake Test'),
+            )
+
           ],
         ),
       ),

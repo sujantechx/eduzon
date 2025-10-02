@@ -42,6 +42,7 @@ class QuestionCubit extends Cubit<QuestionState> {
     String? imageUrl, // Now nullable
     required List<String> options,
     required int correctAnswerIndex,
+    required int questionNumber,
   }) async {
     try {
       emit(QuestionLoading());
@@ -57,7 +58,7 @@ class QuestionCubit extends Cubit<QuestionState> {
         courseId: courseId,
         subjectId: subjectId,
         chapterId: chapterId,
-        question: newQuestion,
+        question: newQuestion, questionNumber: questionNumber ,
       );
       // Re-fetch to update the UI
       await fetchQuestions(
@@ -119,6 +120,7 @@ class QuestionCubit extends Cubit<QuestionState> {
         String? newImageUrl,
         required List<String> newOptions,
         required int newCorrectAnswerIndex,
+        required int questionNumber,
       }) async {
         try {
           emit(QuestionLoading());
@@ -135,6 +137,7 @@ class QuestionCubit extends Cubit<QuestionState> {
             subjectId: subjectId,
             chapterId: chapterId,
             question: updatedQuestion,
+            questionNumber: questionNumber,
           );
           // Re-fetch to update UI
           await fetchQuestions(

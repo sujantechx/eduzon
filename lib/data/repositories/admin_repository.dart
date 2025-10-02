@@ -176,11 +176,14 @@ class AdminRepository {
   Future<void> addSubject(
       {required String courseId,
         required String title,
-        required String description}) async {
+        required String description,
+        required int subjectNumber
+      }) async {
     try {
       await _coursesRef().doc(courseId).collection('subjects').add({
         'title': title,
         'description': description,
+        'subjectNumber': subjectNumber,
       });
     } catch (e) {
       developer.log("Error adding subject: $e");
@@ -190,7 +193,11 @@ class AdminRepository {
 
   /// Adds a new chapter to a subject.
   Future<void> addChapter(
-      {required String courseId, required String subjectId, required String title}) async {
+      {required String courseId, 
+        required String subjectId,
+        required String title,
+        required int    chapterNumber    
+      }) async {
     try {
       await _coursesRef()
           .doc(courseId)
@@ -199,6 +206,7 @@ class AdminRepository {
           .collection('chapters')
           .add({
         'title': title,
+        'chapterNumber': chapterNumber
       });
     } catch (e) {
       developer.log("Error adding chapter: $e");
@@ -213,14 +221,16 @@ class AdminRepository {
         required String chapterId,
         required String title,
         required String videoId,
-        required String duration}) async {
+        required String duration,
+        required int videoNumber}) async {
     try {
       await _videosRef(
-          courseId: courseId, subjectId: subjectId, chapterId: chapterId)
+          courseId: courseId, subjectId: subjectId, chapterId: chapterId, )
           .add({
         'title': title,
         'videoId': videoId,
         'duration': duration,
+        'videoNumber': videoNumber,
       });
     } catch (e) {
       developer.log("Error adding video: $e");
@@ -234,13 +244,16 @@ class AdminRepository {
         required String subjectId,
         required String chapterId,
         required String title,
-        required String url}) async {
+        required String url,
+        required int pdfNumber
+      }) async {
     try {
       await _pdfsRef(
           courseId: courseId, subjectId: subjectId, chapterId: chapterId)
           .add({
         'title': title,
         'url': url,
+        'pdfNumber': pdfNumber,
       });
     } catch (e) {
       developer.log("Error adding PDF: $e");
@@ -253,11 +266,15 @@ class AdminRepository {
       {required String courseId,
         required String subjectId,
         required String chapterId,
-        required QuestionModel question}) async {
+        required QuestionModel question,
+        required int questionNumber
+      }) async {
     try {
       await _questionsRef(
           courseId: courseId, subjectId: subjectId, chapterId: chapterId)
-          .add(question.toFirestore());
+          .add(question.toFirestore(
+            questionNumber: questionNumber,
+      ));
     } catch (e) {
       developer.log("Error adding question: $e");
       throw Exception('Failed to add question.');
@@ -279,13 +296,16 @@ class AdminRepository {
   Future<void> updateSubject(
       {required String courseId,
         required String subjectId,
+        required int subjectNumber,
         required Map<String, dynamic> data}) async {
     try {
+      final updatedData = Map<String, dynamic>.from(data);
+      updatedData['subjectNumber'] = subjectNumber;
       await _coursesRef()
           .doc(courseId)
           .collection('subjects')
           .doc(subjectId)
-          .update(data);
+          .update(updatedData);
     } catch (e) {
       developer.log("Error updating subject: $e");
       throw Exception('Failed to update subject.');
@@ -293,12 +313,35 @@ class AdminRepository {
   }
 
   /// Updates an existing chapter's data.
-  Future<void> updateChapter(
+  Future<void> updateChapter({
+    required String courseId,
+    required String subjectId,
+    required String chapterId,
+    required Map<String, dynamic> data, // 💡 Now just one map
+  }) async {
+    try {
+      await _coursesRef()
+          .doc(courseId)
+          .collection('subjects')
+          .doc(subjectId)
+          .collection('chapters')
+          .doc(chapterId)
+          .update(data); // 💡 Use the provided data map directly
+    } catch (e) {
+      developer.log("Error updating chapter: $e");
+      throw Exception('Failed to update chapter.');
+    }
+  }
+  // deferent way to update chapter number
+ /* Future<void> updateChapter(
       {required String courseId,
         required String subjectId,
         required String chapterId,
+        required int chapterNumber,
         required Map<String, dynamic> data}) async {
     try {
+      final updatedData = Map<String, dynamic>.from(data);
+      updatedData['chapterNumber'] = chapterNumber;
       await _coursesRef()
           .doc(courseId)
           .collection('subjects')
@@ -310,20 +353,23 @@ class AdminRepository {
       developer.log("Error updating chapter: $e");
       throw Exception('Failed to update chapter.');
     }
-  }
+  }*/
 
-  /// Updates an existing video's data.
+/// Updates an existing video's data.
   Future<void> updateVideo(
       {required String courseId,
         required String subjectId,
         required String chapterId,
         required String videoId,
+        required int videoNumber,
         required Map<String, dynamic> data}) async {
     try {
+      final updatedData = Map<String, dynamic>.from(data);
+      updatedData['videoNumber'] = videoNumber;
       await _videosRef(
           courseId: courseId, subjectId: subjectId, chapterId: chapterId)
           .doc(videoId)
-          .update(data);
+          .update(updatedData);
     } catch (e) {
       developer.log("Error updating video: $e");
       throw Exception('Failed to update video.');
@@ -336,8 +382,11 @@ class AdminRepository {
         required String subjectId,
         required String chapterId,
         required String pdfId,
+        required int pdfNumber,
         required Map<String, dynamic> data}) async {
     try {
+      final updatedData = Map<String, dynamic>.from(data);
+      updatedData['pdfNumber'] = pdfNumber;
       await _pdfsRef(
           courseId: courseId, subjectId: subjectId, chapterId: chapterId)
           .doc(pdfId)
@@ -353,12 +402,13 @@ class AdminRepository {
       {required String courseId,
         required String subjectId,
         required String chapterId,
+        required int questionNumber,
         required QuestionModel question}) async {
     try {
       await _questionsRef(
           courseId: courseId, subjectId: subjectId, chapterId: chapterId)
           .doc(question.id)
-          .update(question.toFirestore());
+          .update(question.toFirestore(questionNumber: questionNumber));
     } catch (e) {
       developer.log("Error updating question: $e");
       throw Exception('Failed to update question.');
@@ -460,14 +510,6 @@ class AdminRepository {
     }
   }
 
-  Future<void>submitResult({required ResultModel result}) async {
-    try {
-      await _firestore.collection('results').add(result.toFirestore());
-    } catch (e) {
-      print("Error submitting result: $e");
-      throw Exception('Failed to submit result.');
-    }
-  }
   Future<ResultModel> getPreviousResult({required String userId, required String chapterId}) async {
     try {
       final querySnapshot = await _firestore
@@ -486,6 +528,54 @@ class AdminRepository {
     } catch (e) {
       print("Error fetching previous result: $e");
       throw Exception('Failed to fetch previous result.');
+    }
+  }
+  // lib/data/repositories/test_repository.dart
+
+// ... (inside TestRepository class) ...
+
+  Future<ResultModel?> getResultForUserAndChapter({
+    required String userId,
+    required String chapterId,
+  }) async {
+    try {
+      // Construct the unique document ID
+      final resultDocId = '${userId}_$chapterId';
+
+      // Get the document from the results collection
+      final resultDoc = await _firestore.collection('results').doc(resultDocId).get();
+
+      if (resultDoc.exists) {
+        return ResultModel.fromFirestore(resultDoc);
+      }
+      return null;
+    } catch (e) {
+      developer.log('Error fetching user result: $e', error: e);
+      return null;
+    }
+  }
+
+// ... (your existing submitResult method) ...
+
+ /* Future<void>submitResult({required ResultModel result}) async {
+    try {
+      await _firestore.collection('results').add(result.toFirestore());
+    } catch (e) {
+      print("Error submitting result: $e");
+      throw Exception('Failed to submit result.');
+    }
+  }-*/
+  Future<void> submitResult({required ResultModel result}) async {
+    try {
+      // Use the combined user and chapter IDs as the document ID
+      final resultDocId = '${result.userId}_${result.chapterId}';
+      await _firestore
+          .collection('results')
+          .doc(resultDocId)
+          .set(result.toFirestore()); // Use .set() with a specific ID
+    } catch (e) {
+      print("Error submitting result: $e");
+      throw Exception('Failed to submit result.');
     }
   }
 }

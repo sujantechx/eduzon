@@ -47,20 +47,74 @@ class AdminChaptersPage extends StatelessWidget {
                     if (state.chapters.isEmpty) {
                       return const Center(child: Text('No chapters found. Add one!'));
                     }
+                    final sortedChapters = List<ChapterModel>.from(state.chapters)
+                      ..sort((a, b) {
+                        // If both have a number, sort numerically
+                        if (a.chapterNumber != null && b.chapterNumber != null) {
+                          return a.chapterNumber!.compareTo(b.chapterNumber!);
+                        }
+                        // If 'a' has a number and 'b' doesn't, 'a' comes first
+                        else if (a.chapterNumber != null && b.chapterNumber == null) {
+                          return -1;
+                        }
+                        // If 'b' has a number and 'a' doesn't, 'b' comes first
+                        else if (a.chapterNumber == null && b.chapterNumber != null) {
+                          return 1;
+                        }
+                        // If neither has a number, sort by title as a fallback
+                        else {
+                          return a.title.compareTo(b.title);
+                        }
+                      });
                     return ListView.builder(
-                      itemCount: state.chapters.length,
+                      itemCount: sortedChapters.length,
                       itemBuilder: (context, index) {
-                        final chapter = state.chapters[index];
+                        final chapter = sortedChapters[index];
                         return ListTile(
-                            title: Text(chapter.title),
-                            trailing: Row(
+                          leading: Text(
+                            chapter.chapterNumber != null ? '${chapter.chapterNumber}.' : '',
+                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          title: Text(chapter.title),
+                          trailing: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 IconButton(
                                   icon: const Icon(Icons.edit, color: Colors.blue),
                                   onPressed: () => _showAddEditChapterDialog(context, chapter: chapter),
                                 ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () async {
+                                    final confirm = await showDialog<bool>(
+                                      context: context,
+                                      builder: (ctx) => AlertDialog(
+                                        title: const Text('Delete Question'),
+                                        content: const Text('Are you sure you want to delete this Chapter? This will also delete all associated quizzes. PDF & Videos'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () => Navigator.of(ctx).pop(false),
+                                            child: const Text('Cancel'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () => Navigator.of(ctx).pop(true),
+                                            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                    if (confirm == true) {
+                                      // Dispatch Delete event
+                                      context.read<ChaptersBloc>().add(DeleteChapter(
+                                        courseId: courseId,
+                                        subjectId: subject.id,
+                                        chapterId: chapter.id,
+                                      ));
+                                    }
+                                  },
+                                ),
                                 const Icon(Icons.arrow_forward_ios),
+
                               ],
                             ),
                           onTap: () {
@@ -100,7 +154,8 @@ class AdminChaptersPage extends StatelessWidget {
     final isEditing = chapter != null;
     final formKey = GlobalKey<FormState>();
     final titleController = TextEditingController(text: isEditing ? chapter.title : '');
-    // Read the BLoC from the context passed to this method.
+    final numberController = TextEditingController(text: isEditing && chapter.chapterNumber != null ? chapter.chapterNumber.toString() : '');
+
     final chaptersBloc = context.read<ChaptersBloc>();
 
     showDialog(
@@ -110,15 +165,34 @@ class AdminChaptersPage extends StatelessWidget {
           title: Text(isEditing ? 'Edit Chapter' : 'Add Chapter'),
           content: Form(
             key: formKey,
-            child: TextFormField(
-              controller: titleController,
-              decoration: const InputDecoration(labelText: 'Chapter Title'),
-              validator: (value) {
-                if (value == null || value.trim().isEmpty) {
-                  return 'Please enter a title';
-                }
-                return null;
-              },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: titleController,
+                  decoration: const InputDecoration(labelText: 'Chapter Title'),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter a title';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  controller: numberController,
+                  decoration: const InputDecoration(labelText: 'Chapter Number'),
+                  keyboardType: TextInputType.number,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter a number';
+                    }
+                    if (int.tryParse(value) == null) {
+                      return 'Please enter a valid number';
+                    }
+                    return null;
+                  },
+                ),
+              ],
             ),
           ),
           actions: [
@@ -129,20 +203,22 @@ class AdminChaptersPage extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 if (formKey.currentState!.validate()) {
+                  final int chapterNumber = int.parse(numberController.text);
                   if (isEditing) {
-                    // Dispatch Update event
                     chaptersBloc.add(UpdateChapter(
                       courseId: courseId,
                       subjectId: subject.id,
                       chapterId: chapter.id,
                       newTitle: titleController.text,
+                      newChapterNumber: chapterNumber,
                     ));
                   } else {
-                    // Dispatch Add event
                     chaptersBloc.add(AddChapter(
                       courseId: courseId,
                       subjectId: subject.id,
                       title: titleController.text,
+                      chapterNumber: chapterNumber,
+                      // Pass the new number
                     ));
                   }
                   Navigator.of(dialogContext).pop();

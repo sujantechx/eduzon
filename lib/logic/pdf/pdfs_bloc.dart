@@ -36,6 +36,7 @@ class PdfsBloc extends Bloc<PdfsEvent, PdfsState> {
         chapterId: event.chapterId,
         title: event.title,
         url: event.url,
+        pdfNumber: event.pdfNumber,
       );
       add(LoadPdfs(courseId: event.courseId, subjectId: event.subjectId, chapterId: event.chapterId));
     } catch (e) {
@@ -50,9 +51,11 @@ class PdfsBloc extends Bloc<PdfsEvent, PdfsState> {
         subjectId: event.subjectId,
         chapterId: event.chapterId,
         pdfId: event.id,
+        pdfNumber: event.newPdfNumber,
         data: {
           'title': event.newTitle,
           'url': event.newUrl,
+
         },
       );
       add(LoadPdfs(courseId: event.courseId, subjectId: event.subjectId, chapterId: event.chapterId));

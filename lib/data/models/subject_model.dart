@@ -7,9 +7,10 @@ class SubjectModel {
   final String id;
   final String title;
   final String description;
+  final int? subjectNumber; // Add this field
 
   SubjectModel({required this.id, required this.title,
-    required this.description
+    required this.description,  this.subjectNumber
   });
 
   // Factory to create a SubjectModel from a Firestore document snapshot.
@@ -23,6 +24,7 @@ class SubjectModel {
       id: doc.id,
       title: (data['title'] as String?) ?? 'No Title',
       description: (data['description'] as String?) ?? '',
+      subjectNumber: data['subjectNumber'] as int?// Initialize subjectNumber
     );
   }
 }

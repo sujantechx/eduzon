@@ -21,15 +21,17 @@ class AddChapter extends ChaptersEvent {
   final String courseId;
   final String subjectId;
   final String title;
+  final int chapterNumber; // Add this field
 
   const AddChapter({
     required this.courseId,
     required this.subjectId,
     required this.title,
+    required this.chapterNumber,
   });
 
   @override
-  List<Object> get props => [courseId, subjectId, title];
+  List<Object> get props => [courseId, subjectId, title, chapterNumber];
 }
 
 // Add this event
@@ -38,16 +40,18 @@ class UpdateChapter extends ChaptersEvent {
   final String subjectId;
   final String chapterId;
   final String newTitle;
+  final int newChapterNumber;
 
   const UpdateChapter({
     required this.courseId,
     required this.subjectId,
     required this.chapterId,
     required this.newTitle,
+    required this.newChapterNumber,
   });
 
   @override
-  List<Object> get props => [courseId, subjectId, chapterId, newTitle];
+  List<Object> get props => [courseId, subjectId, chapterId, newTitle, newChapterNumber];
 }
 class DeleteChapter extends ChaptersEvent {
   final String courseId;

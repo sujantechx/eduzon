@@ -2,14 +2,11 @@
 
 import 'dart:async';
 import 'package:bloc/bloc.dart';
-import 'package:eduzon/data/models/question_model.dart';
 import 'package:eduzon/data/models/result_model.dart';
 import 'package:eduzon/data/repositories/admin_repository.dart';
 import 'package:eduzon/logic/auth/auth_bloc.dart';
 import 'package:eduzon/logic/auth/auth_state.dart';
 import 'package:eduzon/logic/test/test_state.dart';
-import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 
 // Cubit
 class QuizCubit extends Cubit<QuizState> {
@@ -18,9 +15,16 @@ class QuizCubit extends Cubit<QuizState> {
   Timer? _timer;
   final int _questionTimeLimit = 30; // 30 seconds per question
 
+  // Class-level variables to store quiz context
+  String? _currentChapterId;
+  String? _currentCourseId;
+  String? _currentSubjectId;
+
+  // Constructor with Dependency Injection
   QuizCubit(this._testRepository, this._authCubit) : super(QuizInitial());
 
-  /// Loads all questions for a specific chapter and starts the quiz.
+  /// Loads all questions for a specific chapter.
+  /// First, it checks for an existing result to prevent re-taking the quiz.
   Future<void> loadQuestions({
     required String courseId,
     required String subjectId,
@@ -28,6 +32,41 @@ class QuizCubit extends Cubit<QuizState> {
   }) async {
     try {
       emit(QuizLoading());
+
+      // Store the context IDs for later use in submitQuiz
+      _currentCourseId = courseId;
+      _currentSubjectId = subjectId;
+      _currentChapterId = chapterId;
+
+      // Get user details to check for existing results
+      final authState = _authCubit.state;
+      if (authState is! Authenticated) {
+        emit(const QuizError(message: 'User not authenticated.'));
+        return;
+      }
+      final userId = authState.userModel.uid;
+
+      // Check if a result already exists for this user and chapter
+      final existingResult = await _testRepository.getResultForUserAndChapter(
+        userId: userId,
+        chapterId: chapterId,
+      );
+
+      // If a result exists, show it immediately and bypass the quiz
+      if (existingResult != null) {
+        final questions = await _testRepository.getQuestions(
+          courseId: courseId,
+          subjectId: subjectId,
+          chapterId: chapterId,
+        );
+        emit(QuizCompleted(
+          result: existingResult,
+          questions: questions, // Pass questions for the review screen
+        ));
+        return;
+      }
+
+      // If no result exists, proceed to load questions and start the quiz
       final questions = await _testRepository.getQuestions(
         courseId: courseId,
         subjectId: subjectId,
@@ -101,6 +140,13 @@ class QuizCubit extends Cubit<QuizState> {
       int correctAnswers = 0;
       final List<Map<String, dynamic>> answerDetails = [];
 
+      // Add null safety checks for the stored variables before use
+      if (_currentChapterId == null || _currentCourseId == null || _currentSubjectId == null) {
+        emit(const QuizError(message: 'Quiz data is missing. Please restart the quiz.'));
+        return;
+      }
+
+      // Aggregate user answers and correct answers
       for (var question in currentState.questions) {
         final userAnswer = currentState.userAnswers[question.id];
         final isCorrect = userAnswer == question.correctAnswerIndex;
@@ -123,11 +169,12 @@ class QuizCubit extends Cubit<QuizState> {
         userName = authState.userModel.name;
       }
 
+      // Create the result model with dynamic data
       final result = ResultModel(
-        id: '', // Firestore will generate
-        userId: userId, // ✅ Dynamic User ID
-        userName: userName, // ✅ Dynamic User Name
-        chapterId: '...', // Pass the actual chapter ID
+        id: '', // Firestore will generate the document ID
+        userId: userId,
+        userName: userName,
+        chapterId: _currentChapterId!,
         totalQuestions: currentState.questions.length,
         correctAnswers: correctAnswers,
         answers: answerDetails,

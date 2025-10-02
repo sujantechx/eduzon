@@ -10,6 +10,7 @@ class QuestionModel extends Equatable {
   final String? imageUrl;
   final List<String> options;
   final int correctAnswerIndex;
+  final int? questionNumber; // Add questionNumber field
 
   const QuestionModel({
     required this.id,
@@ -18,6 +19,7 @@ class QuestionModel extends Equatable {
     this.imageUrl,
     required this.options,
     required this.correctAnswerIndex,
+    this.questionNumber, // Initialize questionNumber
   });
 
   factory QuestionModel.fromFirestore(DocumentSnapshot doc) {
@@ -30,19 +32,23 @@ class QuestionModel extends Equatable {
       imageUrl: data['imageUrl'],
       options: List<String>.from(data['options'] ?? []),
       correctAnswerIndex: data['correctAnswerIndex'] ?? 0,
+      questionNumber: data['questionNumber'] as int?, // Initialize questionNumber
     );
   }
 
-  Map<String, dynamic> toFirestore() {
+  Map<String, dynamic> toFirestore({required int questionNumber}) {
     return {
       'type': type,
       if (type == 'text') 'text': text,
       if (type == 'image') 'imageUrl': imageUrl,
       'options': options,
       'correctAnswerIndex': correctAnswerIndex,
+      if (questionNumber != null) 'questionNumber': questionNumber, // Add questionNumber to Firestore map
     };
   }
 
   @override
-  List<Object?> get props => [id, type, text, imageUrl, options, correctAnswerIndex];
+  List<Object?> get props => [id, type, text, imageUrl, options, correctAnswerIndex, questionNumber];
+
+  get chapterId => null;
 }

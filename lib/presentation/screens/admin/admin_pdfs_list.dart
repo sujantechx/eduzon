@@ -76,6 +76,11 @@ class AdminPdfsList extends StatelessWidget {
     final formKey = GlobalKey<FormState>();
     final titleController = TextEditingController(text: isEditing ? pdf.title : '');
     final urlController = TextEditingController(text: isEditing ? pdf.url : '');
+// The first line is correct, assuming 'isEditing' and 'pdf' are defined.
+    final pdfNumberController = TextEditingController(text: isEditing && pdf.pdfNumber != null ? pdf.pdfNumber.toString() : '');
+// Corrected and safer way to get the integer value.
+    final int? pdfNumber = int.tryParse(pdfNumberController.text);
+
     final pdfsBloc = context.read<PdfsBloc>();
 
     showDialog(
@@ -89,6 +94,20 @@ class AdminPdfsList extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  TextFormField(
+                    controller: pdfNumberController,
+                    decoration: const InputDecoration(labelText: 'PDF Number (optional)'),
+                    keyboardType: TextInputType.number,
+                    validator: (v) {
+                      if (v != null && v.trim().isNotEmpty) {
+                        final number = int.tryParse(v);
+                        if (number == null || number < 0) {
+                          return 'Enter a valid non-negative number';
+                        }
+                      }
+                      return null;
+                    },
+                  ),
                   TextFormField(
                     controller: titleController,
                     decoration: const InputDecoration(labelText: 'Title'),
@@ -111,6 +130,7 @@ class AdminPdfsList extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 if (formKey.currentState!.validate()) {
+                  final int pdfNumbers = int.tryParse(pdfNumberController.text) ?? (isEditing ? pdf!.pdfNumber ?? 0 : 0);
                   if (isEditing) {
                     pdfsBloc.add(UpdatePdf(
                       courseId: courseId,
@@ -119,6 +139,7 @@ class AdminPdfsList extends StatelessWidget {
                       id: pdf.id,
                       newTitle: titleController.text,
                       newUrl: urlController.text,
+                      newPdfNumber: pdfNumbers, // Keep the same number for existing PDFs
                     ));
                   } else {
                     pdfsBloc.add(AddPdf(
@@ -127,6 +148,7 @@ class AdminPdfsList extends StatelessWidget {
                       chapterId: chapterId,
                       title: titleController.text,
                       url: urlController.text,
+                      pdfNumber: pdfNumbers, // Default number for new PDFs
                     ));
                   }
                   Navigator.of(dialogContext).pop();

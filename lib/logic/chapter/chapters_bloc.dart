@@ -16,6 +16,7 @@ class ChaptersBloc extends Bloc<ChaptersEvent, ChaptersState> {
     // Register the new event handlers
     on<AddChapter>(_onAddChapter);
     on<UpdateChapter>(_onUpdateChapter);
+    on<DeleteChapter>(_onDeleteChapter);
   }
 
   void _onLoadChapters(LoadChapters event, Emitter<ChaptersState> emit) async {
@@ -38,6 +39,7 @@ class ChaptersBloc extends Bloc<ChaptersEvent, ChaptersState> {
         courseId: event.courseId,
         subjectId: event.subjectId,
         title: event.title,
+        chapterNumber: event.chapterNumber,
       );
       // After adding, reload the chapters to show the new one
       add(LoadChapters(courseId: event.courseId, subjectId: event.subjectId));
@@ -49,18 +51,41 @@ class ChaptersBloc extends Bloc<ChaptersEvent, ChaptersState> {
   // Add this handler method
   void _onUpdateChapter(UpdateChapter event, Emitter<ChaptersState> emit) async {
     try {
+      // 💡 Create a single map with all fields to be updated
+      final Map<String, dynamic> updateData = {
+        'title': event.newTitle,
+        'chapterNumber': event.newChapterNumber,
+      };
+
       await _adminRepository.updateChapter(
         courseId: event.courseId,
         subjectId: event.subjectId,
         chapterId: event.chapterId,
-        data: {'title': event.newTitle},
+        data: updateData, // Pass the combined map
       );
       // After updating, reload the list
-      add(LoadChapters(courseId: event.courseId, subjectId: event.subjectId));
+      add(LoadChapters(courseId: event.courseId, subjectId: event.subjectId,));
     } catch (e) {
       emit(ChaptersError(e.toString()));
     }
   }
+  // deferent way to update chapter number
+
+  /*void _onUpdateChapter(UpdateChapter event, Emitter<ChaptersState> emit) async {
+    try {
+      await _adminRepository.updateChapter(
+        courseId: event.courseId,
+        subjectId: event.subjectId,
+        chapterId: event.chapterId,
+        chapterNumber: event.newChapterNumber,
+        data: {'title': event.newTitle},
+      );
+      // After updating, reload the list
+      add(LoadChapters(courseId: event.courseId, subjectId: event.subjectId,));
+    } catch (e) {
+      emit(ChaptersError(e.toString()));
+    }
+  }*/
   // Add the _onDeleteChapter method if needed
 void _onDeleteChapter(DeleteChapter event, Emitter<ChaptersState> emit) async {
     try {

@@ -24,6 +24,7 @@ class AddPdf extends PdfsEvent {
   final String chapterId;
   final String title;
   final String url;
+  final int pdfNumber; // Add this field
 
   const AddPdf({
     required this.courseId,
@@ -31,10 +32,11 @@ class AddPdf extends PdfsEvent {
     required this.chapterId,
     required this.title,
     required this.url,
+    required this.pdfNumber,
   });
 
   @override
-  List<Object> get props => [courseId, subjectId, chapterId, title, url];
+  List<Object> get props => [courseId, subjectId, chapterId, title, url, pdfNumber];
 }
 
 // Add this event
@@ -45,6 +47,7 @@ class UpdatePdf extends PdfsEvent {
   final String id; // Document ID of the PDF to update
   final String newTitle;
   final String newUrl;
+  final int newPdfNumber; // Add this field
 
   const UpdatePdf({
     required this.courseId,
@@ -53,8 +56,9 @@ class UpdatePdf extends PdfsEvent {
     required this.id,
     required this.newTitle,
     required this.newUrl,
+    required this.newPdfNumber,
   });
 
   @override
-  List<Object> get props => [courseId, subjectId, chapterId, id, newTitle, newUrl];
+  List<Object> get props => [courseId, subjectId, chapterId, id, newTitle, newUrl, newPdfNumber];
 }

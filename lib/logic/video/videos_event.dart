@@ -25,6 +25,7 @@ class AddVideo extends VideosEvent {
   final String title;
   final String videoId; // YouTube ID
   final String duration;
+  final int videoNumber; // Add this field
 
   const AddVideo({
     required this.courseId,
@@ -32,11 +33,11 @@ class AddVideo extends VideosEvent {
     required this.chapterId,
     required this.title,
     required this.videoId,
-    required this.duration,
+    required this.duration, required this.videoNumber,
   });
 
   @override
-  List<Object> get props => [courseId, subjectId, chapterId, title, videoId, duration];
+  List<Object> get props => [courseId, subjectId, chapterId, title, videoId, duration, videoNumber];
 }
 
 // Add this event
@@ -48,6 +49,7 @@ class UpdateVideo extends VideosEvent {
   final String newTitle;
   final String newVideoId;
   final String newDuration;
+  final int newVideoNumber; // Add this field
 
   const UpdateVideo({
     required this.courseId,
@@ -57,8 +59,25 @@ class UpdateVideo extends VideosEvent {
     required this.newTitle,
     required this.newVideoId,
     required this.newDuration,
+    required this.newVideoNumber,
+  });
+  @override
+  List<Object> get props => [courseId, subjectId, chapterId, id, newTitle, newVideoId, newDuration, newVideoNumber];
+}
+
+class DeleteVideo extends VideosEvent {
+  final String courseId;
+  final String subjectId;
+  final String chapterId;
+  final String videoId; // Document ID of the video to delete
+
+  const DeleteVideo({
+    required this.courseId,
+    required this.subjectId,
+    required this.chapterId,
+    required this.videoId,
   });
 
   @override
-  List<Object> get props => [courseId, subjectId, chapterId, id, newTitle, newVideoId, newDuration];
+  List<Object> get props => [courseId, subjectId, chapterId, videoId];
 }

@@ -2,12 +2,14 @@ import 'dart:async';
 import 'package:eduzon/data/models/courses_moddel.dart';
 import 'package:eduzon/data/models/user_model.dart';
 import 'package:eduzon/presentation/screens/admin/manage_question.dart';
+import 'package:eduzon/presentation/screens/student/test_results.dart';
 import 'package:eduzon/presentation/screens/student/test_subjects.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:developer' as developer;
 import '../../data/models/chapter_model.dart';
 import '../../data/models/pdf_model.dart';
+import '../../data/models/question_model.dart';
 import '../../data/models/subject_model.dart';
 import '../../logic/auth/auth_bloc.dart';
 import '../../logic/auth/auth_state.dart';
@@ -198,6 +200,15 @@ class AppRouter {
           final courseId=data['courseId'] as String;
           final chapter=data['chapter'] as ChapterModel;
           return TestScreen(courseId: courseId,subjectId: subject.id,chapterId: chapter ,);
+        }),
+        GoRoute(path: AppRoutes.quizResult,builder:(context,state){
+          final data=state.extra as Map<String,dynamic>;
+          final result=data['result'];
+          final questions=data['questions'] as List<QuestionModel>;
+          final courseId=data['courseId'] as String;
+          final subjectId=data['subjectId'] as String;
+          final chapterId=data['chapterId'] as String;
+          return QuizResultScreen(result: result, questions: questions, courseId: courseId, subjectId: subjectId, chapterId: chapterId,);
         }),
 
         StatefulShellRoute.indexedStack(

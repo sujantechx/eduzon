@@ -30,6 +30,7 @@ class AppRoutes {
   static const String videoPlayer = '/video-player';
   static const String  testScreen = '/testScreen';
   static const String  testChapter = '/testChapter';
+  static const String  quizResult = '/quizResult';
 
   // Admin Panel Routes
 

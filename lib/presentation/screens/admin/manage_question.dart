@@ -49,32 +49,253 @@ class _ManageQuestionState extends State<ManageQuestion> {
             if (state.questions.isEmpty) {
               return const Center(child: Text('No questions found. Add one!'));
             }
+            final sortedQuestions = List<QuestionModel>.from(state.questions)
+              ..sort((a, b) {
+                // If both have a question number, sort numerically
+                if (a.questionNumber != null && b.questionNumber != null) {
+                  return a.questionNumber!.compareTo(b.questionNumber!);
+                }
+                // If 'a' has a number and 'b' doesn't, 'a' comes first
+                else if (a.questionNumber != null && b.questionNumber == null) {
+                  return -1;
+                }
+                // If 'b' has a number and 'a' doesn't, 'b' comes first
+                else if (a.questionNumber == null && b.questionNumber != null) {
+                  return 1;
+                }
+                // If neither has a number, sort by ID as a fallback
+                else {
+                  return a.id.compareTo(b.id);
+                }
+              });
             return ListView.builder(
               itemCount: state.questions.length,
               itemBuilder: (context, index) {
                 final question = state.questions[index];
-                return ListTile(
-                  title: Text(question.text ?? 'No Text'),
-                  subtitle: Text('Options: ${question.options.length} | Correct: ${question.correctAnswerIndex + 1}'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
+                return
+                  Stack(
                     children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit, color: Colors.blue),
-                        onPressed: () => _showAddEditQuestionDialog(context, question: question),
+                      // Main container for the question content
+                      Container(
+                        height: 250,
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(10),
+                        margin: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.1), // Add a background color for the container
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              spreadRadius: 1,
+                              blurRadius: 5,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: question.type == 'image'
+                              ? (question.imageUrl != null && question.imageUrl!.isNotEmpty
+                              ? ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              question.imageUrl!,
+                              fit: BoxFit.cover,
+                              width: double.infinity,
+                              height: 250,
+                              loadingBuilder: (context, child, loadingProgress) {
+                                if (loadingProgress == null) return child;
+                                return const Center(child: CircularProgressIndicator());
+                              },
+                              errorBuilder: (context, error, stackTrace) =>
+                              const Center(child: Text('Image not available')),
+                            ),
+                          )
+                              : const Text('Image not available'))
+                              : (question.text != null && question.text!.isNotEmpty
+                              ? Text(
+                            question.text!,
+                            style: const TextStyle(fontSize: 18),
+                            textAlign: TextAlign.center,
+                          )
+                              : const Text('No question text')),
+                        ),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () => context.read<QuestionCubit>().deleteQuestion(
-                          courseId: widget.courseId,
-                          subjectId: widget.subjectId,
-                          chapterId: widget.chapterId,
-                          questionId: question.id,
+
+                      // Question number at the top-left
+                      Positioned(
+                        top: 20,
+                        left: 20,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withOpacity(0.8),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child:Text(
+                            question.questionNumber != null ? 'Q ${question.questionNumber}': 'Q ${index + 1}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Colors.white,
+                            ),
+                          ),
+                        /*  Text(
+                            'Q ${index + 1}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Colors.white,
+                            ),
+                          ),*/
+                        ),
+                      ),
+
+                      // Correct answer and options count at the bottom-left
+                      Positioned(
+                        bottom: 20,
+                        right: 20,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            // color: Colors.black54,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Text(
+                            'Option: ${question.options.length} | Ans: ${question.correctAnswerIndex + 1}',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              // color: Colors.green,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // Edit and delete buttons at the top-right
+                      Positioned(
+                        top: 10,
+                        right: 10,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Card(
+                              child: IconButton(
+                                icon: const Icon(Icons.edit, color: Colors.blue),
+                                onPressed: () => _showAddEditQuestionDialog(context, question: question),
+                              ),
+                            ),
+                            Card(
+                              child: IconButton(
+                                icon: const Icon(Icons.delete, color: Colors.red),
+                                onPressed: () async {
+                                  final confirm = await showDialog<bool>(
+                                    context: context,
+                                    builder: (ctx) => AlertDialog(
+                                      title: const Text('Delete Question'),
+                                      content: const Text('Are you sure you want to delete this question?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.of(ctx).pop(false),
+                                          child: const Text('Cancel'),
+                                        ),
+                                        TextButton(
+                                          onPressed: () => Navigator.of(ctx).pop(true),
+                                          child: const Text('Delete', style: TextStyle(color: Colors.red)),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                  if (confirm == true) {
+                                    context.read<QuestionCubit>().deleteQuestion(
+                                      courseId: widget.courseId,
+                                      subjectId: widget.subjectId,
+                                      chapterId: widget.chapterId,
+                                      questionId: question.id,
+                                    );
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
+                  );
+/*
+                  ListTile(
+                  leading: Text(
+                    'Q ${index + 1}',
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  title: Container(
+                    height: 250,
+                    width: double.infinity,
+                    padding: EdgeInsets.all(10),
+                    margin: EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: question.type == 'image'
+                        ? (question.imageUrl != null && question.imageUrl!.isNotEmpty
+                        ? ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        question.imageUrl!,
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: 250,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return const Center(child: CircularProgressIndicator());
+                        },
+                        errorBuilder: (context, error, stackTrace) =>
+                        const Center(child: Text('Image not available')),
+                      ),
+                    )
+                        : const Center(child: Text('Image not available')))
+                        : (question.text != null && question.text!.isNotEmpty
+                        ? Center(
+                      child: Text(
+                        question.text!,
+                        style: const TextStyle(fontSize: 18),
+                        textAlign: TextAlign.center,
+                      ),
+                    )
+                        : const Center(child: Text('No question text'))),
+                  ),
+                  subtitle: Text(
+                      'Options: ${question.options.length} | Correct: ${question.correctAnswerIndex + 1}'),
+                  trailing: SizedBox(
+                    width: 80,
+                    child: Stack(
+                      alignment: Alignment.centerRight,
+                      children: [
+                        Positioned(
+                          right: 40,
+                          child: IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () =>
+                                _showAddEditQuestionDialog(context, question: question),
+                          ),
+                        ),
+                        Positioned(
+                          right: 0,
+                          child: IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => context.read<QuestionCubit>().deleteQuestion(
+                              courseId: widget.courseId,
+                              subjectId: widget.subjectId,
+                              chapterId: widget.chapterId,
+                              questionId: question.id,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 );
+*/
               },
             );
           }
@@ -102,7 +323,8 @@ class _ManageQuestionState extends State<ManageQuestion> {
 
     // ✅ Initialize _questionType based on the existing question
     String _questionType = isEditing ? question.type : 'text';
-
+    final questionNumberController = TextEditingController(
+        text: isEditing ? (question.questionNumber?.toString() ?? '') : '');
     final textController = TextEditingController(
         text: isEditing ? question.text : '');
     final imageUrlController = TextEditingController(
@@ -140,7 +362,7 @@ class _ManageQuestionState extends State<ManageQuestion> {
                   padding: const EdgeInsets.only(
                       bottom: 30.0, top: 16.0, left: 16.0, right: 16.0),
                   decoration: const BoxDecoration(
-                    color: Colors.white,
+                    // color: Colors.white,
                     borderRadius: BorderRadius.only(
                       topLeft: Radius.circular(20),
                       topRight: Radius.circular(20),
@@ -160,6 +382,22 @@ class _ManageQuestionState extends State<ManageQuestion> {
                                 .textTheme
                                 .headlineSmall,
                           ),
+                        ),
+                        TextFormField(
+                          controller: questionNumberController,
+                          decoration: const InputDecoration(
+                              labelText: 'Question Number (optional)',
+                              border: OutlineInputBorder()),
+                          keyboardType: TextInputType.number,
+                          validator: (v) {
+                            if (v != null && v.trim().isNotEmpty) {
+                              final number = int.tryParse(v);
+                              if (number == null || number < 0) {
+                                return 'Enter a valid non-negative number';
+                              }
+                            }
+                            return null;
+                          },
                         ),
                         StatefulBuilder(
                           builder: (context, setModalState) =>
@@ -257,7 +495,7 @@ class _ManageQuestionState extends State<ManageQuestion> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            TextButton(
+                            ElevatedButton(
                               style: TextButton.styleFrom(
                                 backgroundColor: Colors.red,
                               ),
@@ -269,6 +507,10 @@ class _ManageQuestionState extends State<ManageQuestion> {
                             ElevatedButton(
                               onPressed: () {
                                 if (formKey.currentState!.validate()) {
+                                  // Collect options from controllers
+                                  final int questionNumber = questionNumberController.text.isNotEmpty
+                                      ? int.parse(questionNumberController.text)
+                                      : 0; // Default to 0 if empty
                                   final options = optionsControllers.map((
                                       c) => c.text).toList();
                                   final correctIndex = int.parse(
@@ -290,6 +532,7 @@ class _ManageQuestionState extends State<ManageQuestion> {
                                       newOptions: options,
                                       newCorrectAnswerIndex: correctIndex,
                                       type: '',
+                                      questionNumber:questionNumber ,
                                     );
                                   } else {
                                     questionCubit.addQuestion(
@@ -297,6 +540,7 @@ class _ManageQuestionState extends State<ManageQuestion> {
                                       subjectId: widget.subjectId,
                                       chapterId: widget.chapterId,
                                       type: _questionType,
+
                                       // ✅ Pass the question type
                                       text: _questionType == 'text'
                                           ? textController.text
@@ -306,11 +550,13 @@ class _ManageQuestionState extends State<ManageQuestion> {
                                           : null,
                                       options: options,
                                       correctAnswerIndex: correctIndex,
+                                      questionNumber: questionNumber,
                                     );
                                   }
                                   Navigator.of(dialogContext).pop();
                                 }
                               },
+
                               child: Text(isEditing ? 'Save' : 'Add'),
                             ),
                           ],

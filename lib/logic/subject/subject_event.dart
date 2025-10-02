@@ -22,15 +22,17 @@ class AddSubject extends SubjectEvent {
   final String courseId;
   final String title;
   final String description;
+  final int subjectNumber; // Add this field
 
   const AddSubject({
     required this.courseId,
     required this.title,
     required this.description,
+    required this.subjectNumber,
   });
 
   @override
-  List<Object> get props => [courseId, title, description];
+  List<Object> get props => [courseId, title, description, subjectNumber];
 }
 
 /// Event to update an existing subject.
@@ -39,16 +41,18 @@ class UpdateSubject extends SubjectEvent {
   final String subjectId;
   final String newTitle;
   final String newDescription;
+  final int newSubjectNumber;
 
   const UpdateSubject({
     required this.courseId,
     required this.subjectId,
     required this.newTitle,
     required this.newDescription,
+    required this.newSubjectNumber,
   });
 
   @override
-  List<Object> get props => [courseId, subjectId, newTitle, newDescription];
+  List<Object> get props => [courseId, subjectId, newTitle, newDescription, newSubjectNumber];
 }
 
 /// Event to delete a subject.

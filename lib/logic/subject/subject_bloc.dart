@@ -30,6 +30,7 @@ class SubjectsBloc extends Bloc<SubjectEvent, SubjectState> {
         courseId: event.courseId,
         title: event.title,
         description: event.description,
+        subjectNumber: event.subjectNumber,
       );
       // After adding, reload the subjects to show the new one
       add(LoadSubjects(courseId: event.courseId));
@@ -44,6 +45,7 @@ class SubjectsBloc extends Bloc<SubjectEvent, SubjectState> {
       await _adminRepository.updateSubject(
         courseId: event.courseId,
         subjectId: event.subjectId,
+        subjectNumber: event.newSubjectNumber,
         data: {'title': event.newTitle, 'description': event.newDescription},
       );
       // After updating, reload the list
