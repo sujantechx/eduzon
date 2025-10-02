@@ -71,10 +71,19 @@ class AdminChaptersPage extends StatelessWidget {
                       itemBuilder: (context, index) {
                         final chapter = sortedChapters[index];
                         return ListTile(
-                          leading: Text(
-                            chapter.chapterNumber != null ? '${chapter.chapterNumber}.' : '',
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          leading:Container(
+                            width: 60,
+                            child: Row(
+                              children: [
+                                Text(
+                                  chapter.chapterNumber != null ? '${chapter.chapterNumber}.' : '',
+                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                ),
+                               const Icon(Icons.article_rounded, color: Colors.green),
+                              ],
+                            ),
                           ),
+
                           title: Text(chapter.title),
                           trailing: Row(
                               mainAxisSize: MainAxisSize.min,

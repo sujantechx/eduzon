@@ -46,21 +46,22 @@ class PdfsBloc extends Bloc<PdfsEvent, PdfsState> {
 
   void _onUpdatePdf(UpdatePdf event, Emitter<PdfsState> emit) async {
     try {
+      // 💡 Create the complete data map here.
+      final Map<String, dynamic> updateData = {
+        'title': event.newTitle,
+        'url': event.newUrl,
+        'pdfNumber': event.newPdfNumber,
+      };
+
       await _adminRepository.updatePdf(
         courseId: event.courseId,
         subjectId: event.subjectId,
         chapterId: event.chapterId,
         pdfId: event.id,
-        pdfNumber: event.newPdfNumber,
-        data: {
-          'title': event.newTitle,
-          'url': event.newUrl,
-
-        },
+        data: updateData,  // 💡 Pass the single, complete map.
       );
       add(LoadPdfs(courseId: event.courseId, subjectId: event.subjectId, chapterId: event.chapterId));
     } catch (e) {
       emit(PdfsError(e.toString()));
     }
-  }
-}
+  }}

@@ -40,16 +40,45 @@ class AdminPdfsList extends StatelessWidget {
             if (state.pdfs.isEmpty) {
               return const Center(child: Text('No PDFs found. Add one!'));
             }
+            final sortedPdfs = List<PdfModel>.from(state.pdfs)..sort((a, b) {
+              // If both have a number, sort numerically
+              if (a.pdfNumber != null && b.pdfNumber != null) {
+                return a.pdfNumber!.compareTo(b.pdfNumber!);
+              }
+              // If 'a' has a number and 'b' doesn't, 'a' comes first
+              else if (a.pdfNumber != null && b.pdfNumber == null) {
+                return -1;
+              }
+              // If 'b' has a number and 'a' doesn't, 'b' comes first
+              else if (a.pdfNumber == null && b.pdfNumber != null) {
+                return 1;
+              }
+              // If neither has a number, sort by title as a fallback
+              else {
+                return a.title.compareTo(b.title);
+              }
+            });
             return ListView.builder(
-              itemCount: state.pdfs.length,
+              itemCount: sortedPdfs.length,
               itemBuilder: (context, index) {
-                final pdf = state.pdfs[index];
+                final pdf = sortedPdfs[index];
                 return InkWell(
                   onTap: () {
                     // Navigate to the ADMIN PDF viewer route
                     Navigator.of(context).pushNamed(AppRoutes.adminPdfViewer, arguments: pdf.url);                  },
                   child: ListTile(
-                    leading: const Icon(Icons.description),
+                    leading: Container(
+                      width: 60,
+                      child: Row(
+                        children: [
+                          Text(
+                            pdf.pdfNumber != null ? '${pdf.pdfNumber}.' : '',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          const Icon(Icons.picture_as_pdf, color: Colors.red),
+                        ],
+                      ),
+                    ),
                     title: Text(pdf.title),
                     trailing: IconButton(
                       icon: const Icon(Icons.edit, color: Colors.blue),

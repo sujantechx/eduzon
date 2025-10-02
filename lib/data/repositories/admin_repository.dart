@@ -382,11 +382,10 @@ class AdminRepository {
         required String subjectId,
         required String chapterId,
         required String pdfId,
-        required int pdfNumber,
-        required Map<String, dynamic> data}) async {
+        required Map<String, dynamic> data,
+
+      }) async {
     try {
-      final updatedData = Map<String, dynamic>.from(data);
-      updatedData['pdfNumber'] = pdfNumber;
       await _pdfsRef(
           courseId: courseId, subjectId: subjectId, chapterId: chapterId)
           .doc(pdfId)
@@ -396,7 +395,6 @@ class AdminRepository {
       throw Exception('Failed to update PDF.');
     }
   }
-
   /// Updates an existing question.
   Future<void> updateQuestion(
       {required String courseId,

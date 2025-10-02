@@ -69,10 +69,19 @@ class AdminSubjectsPage extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final subject = sortedSubjects[index];
                       return ListTile(
-                        leading: Text(
-                          subject.subjectNumber != null ? '${subject.subjectNumber}.' : '0',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        leading: Container(
+                          width: 60,
+                          child: Row(
+                            children: [
+                              Text(
+                                subject.subjectNumber != null ? '${subject.subjectNumber}.' : '0',
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              const Icon(Icons.topic, color: Colors.blue),
+                            ],
+                          ),
                         ),
+
                         title: Text(subject.title),
                         subtitle: Text(subject.description),
                         trailing: Row(

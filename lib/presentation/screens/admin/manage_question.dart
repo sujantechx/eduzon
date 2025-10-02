@@ -69,9 +69,9 @@ class _ManageQuestionState extends State<ManageQuestion> {
                 }
               });
             return ListView.builder(
-              itemCount: state.questions.length,
+              itemCount: sortedQuestions.length,
               itemBuilder: (context, index) {
-                final question = state.questions[index];
+                final question = sortedQuestions[index];
                 return
                   Stack(
                     children: [
@@ -100,7 +100,7 @@ class _ManageQuestionState extends State<ManageQuestion> {
                             borderRadius: BorderRadius.circular(8),
                             child: Image.network(
                               question.imageUrl!,
-                              fit: BoxFit.cover,
+                              fit: BoxFit.fill,
                               width: double.infinity,
                               height: 250,
                               loadingBuilder: (context, child, loadingProgress) {
@@ -124,12 +124,12 @@ class _ManageQuestionState extends State<ManageQuestion> {
 
                       // Question number at the top-left
                       Positioned(
-                        top: 20,
-                        left: 20,
+                        top: 5,
+                        left: 5,
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.blue.withOpacity(0.8),
+                            color: Colors.blue.withOpacity(0.5),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child:Text(
@@ -137,17 +137,9 @@ class _ManageQuestionState extends State<ManageQuestion> {
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
-                              color: Colors.white,
+                              // color: Colors.white,
                             ),
                           ),
-                        /*  Text(
-                            'Q ${index + 1}',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                              color: Colors.white,
-                            ),
-                          ),*/
                         ),
                       ),
 
@@ -179,13 +171,23 @@ class _ManageQuestionState extends State<ManageQuestion> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Card(
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
                               child: IconButton(
                                 icon: const Icon(Icons.edit, color: Colors.blue),
                                 onPressed: () => _showAddEditQuestionDialog(context, question: question),
                               ),
                             ),
-                            Card(
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.withOpacity(0.3),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
                               child: IconButton(
                                 icon: const Icon(Icons.delete, color: Colors.red),
                                 onPressed: () async {
@@ -222,80 +224,6 @@ class _ManageQuestionState extends State<ManageQuestion> {
                       ),
                     ],
                   );
-/*
-                  ListTile(
-                  leading: Text(
-                    'Q ${index + 1}',
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  title: Container(
-                    height: 250,
-                    width: double.infinity,
-                    padding: EdgeInsets.all(10),
-                    margin: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: question.type == 'image'
-                        ? (question.imageUrl != null && question.imageUrl!.isNotEmpty
-                        ? ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        question.imageUrl!,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: 250,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return const Center(child: CircularProgressIndicator());
-                        },
-                        errorBuilder: (context, error, stackTrace) =>
-                        const Center(child: Text('Image not available')),
-                      ),
-                    )
-                        : const Center(child: Text('Image not available')))
-                        : (question.text != null && question.text!.isNotEmpty
-                        ? Center(
-                      child: Text(
-                        question.text!,
-                        style: const TextStyle(fontSize: 18),
-                        textAlign: TextAlign.center,
-                      ),
-                    )
-                        : const Center(child: Text('No question text'))),
-                  ),
-                  subtitle: Text(
-                      'Options: ${question.options.length} | Correct: ${question.correctAnswerIndex + 1}'),
-                  trailing: SizedBox(
-                    width: 80,
-                    child: Stack(
-                      alignment: Alignment.centerRight,
-                      children: [
-                        Positioned(
-                          right: 40,
-                          child: IconButton(
-                            icon: const Icon(Icons.edit, color: Colors.blue),
-                            onPressed: () =>
-                                _showAddEditQuestionDialog(context, question: question),
-                          ),
-                        ),
-                        Positioned(
-                          right: 0,
-                          child: IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => context.read<QuestionCubit>().deleteQuestion(
-                              courseId: widget.courseId,
-                              subjectId: widget.subjectId,
-                              chapterId: widget.chapterId,
-                              questionId: question.id,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-*/
               },
             );
           }
