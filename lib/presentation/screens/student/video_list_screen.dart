@@ -51,17 +51,43 @@ class VideosListScreen extends StatelessWidget {
               child: Text('No videos found for this chapter.'),
             );
           }
+          final sortedVideos = List<VideoModel>.from(snapshot.data!)
+            ..sort((a, b) {
+              // If both have a number, sort numerically
+              if (a.videoNumber != null && b.videoNumber != null) {
+                return a.videoNumber!.compareTo(b.videoNumber!);
+              }
+              // If 'a' has a number and 'b' doesn't, 'a' comes first
+              else if (a.videoNumber != null && b.videoNumber == null) {
+                return -1;
+              }
+              // If 'b' has a number and 'a' doesn't, 'b' comes first
+              else if (a.videoNumber == null && b.videoNumber != null) {
+                return 1;
+              }
+              // If neither has a number, sort by title as a fallback
+              else {
+                return a.title.compareTo(b.title);
+              }
+            });
 
           final videos = snapshot.data!;
           return ListView.builder(
-            itemCount: videos.length,
+            itemCount: sortedVideos.length,
             itemBuilder: (context, index) {
-              final video = videos[index];
+              final video = sortedVideos[index];
               return Card(
                 margin: const EdgeInsets.all(8.0),
                 child: ListTile(
-                  leading: const Icon(Icons.play_circle_fill_rounded, color: Colors.red),
-                  title: Text(video.title, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  leading: Container(
+                    width: 60,
+                    child: Row(
+                      children: [
+                        Text(video.videoNumber != null ? '${video.videoNumber}.' : '0'),
+                        const Icon(Icons.play_circle_fill_rounded, color: Colors.red),
+                      ],
+                    ),
+                  ),                  title: Text(video.title, style: const TextStyle(fontWeight: FontWeight.bold)),
                   subtitle: Text('Duration: ${video.duration}'),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {

@@ -95,11 +95,7 @@ class QuizResultScreen extends StatelessWidget {
             // Pop the current results screen to go back to the chapter list.
                Navigator.of(context).pop();
             // Trigger the retest logic in the QuizCubit with the necessary IDs.
-            context.read<QuizCubit>().retest(
-            courseId: courseId,
-            subjectId: subjectId,
-            chapterId: chapterId,
-            );
+
             },
             child: const Text('Retake Test'),
             )

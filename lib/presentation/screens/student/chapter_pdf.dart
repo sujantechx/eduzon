@@ -1,4 +1,5 @@
 // lib/presentation/screens/student/chapters_list_screen.dart
+import 'package:eduzon/data/models/pdf_model.dart';
 import 'package:eduzon/data/repositories/admin_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -35,16 +36,43 @@ class ChapterPdf extends StatelessWidget {
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No chapters found for this subject.'));
           }
+         final sortedChapters = List<ChapterModel>.from(snapshot.data!)
+            ..sort((a, b) {
+              // If both have a number, sort numerically
+              if (a.chapterNumber != null && b.chapterNumber != null) {
+                return a.chapterNumber!.compareTo(b.chapterNumber!);
+              }
+              // If 'a' has a number and 'b' doesn't, 'a' comes first
+              else if (a.chapterNumber != null && b.chapterNumber == null) {
+                return -1;
+              }
+              // If 'b' has a number and 'a' doesn't, 'b' comes first
+              else if (a.chapterNumber == null && b.chapterNumber != null) {
+                return 1;
+              }
+              // If neither has a number, sort by title as a fallback
+              else {
+                return a.title.compareTo(b.title);
+              }
+            });
 
           final chapters = snapshot.data!;
           return ListView.builder(
-            itemCount: chapters.length,
+            itemCount: sortedChapters.length,
             itemBuilder: (context, index) {
-              final chapter = chapters[index];
+              final chapter = sortedChapters[index];
               return Card(
                 margin: const EdgeInsets.all(8.0),
                 child: ListTile(
-                  leading: const Icon(Icons.article_rounded, color: Colors.green),
+                  leading:  Container(
+                    width: 60,
+                    child: Row(
+                      children: [
+                       Text(chapter.chapterNumber != null ? chapter.chapterNumber.toString() : ''),
+                        const Icon(Icons.article, color: Colors.green),
+                      ],
+                    ),
+                  ),
                   title: Text(chapter.title, style: const TextStyle(fontWeight: FontWeight.bold)),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {

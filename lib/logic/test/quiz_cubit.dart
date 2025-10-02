@@ -29,16 +29,15 @@ class QuizCubit extends Cubit<QuizState> {
     required String courseId,
     required String subjectId,
     required String chapterId,
+    bool forceRetest = false, // ✅ Added new parameter
   }) async {
     try {
       emit(QuizLoading());
 
-      // Store the context IDs for later use in submitQuiz
       _currentCourseId = courseId;
       _currentSubjectId = subjectId;
       _currentChapterId = chapterId;
 
-      // Get user details to check for existing results
       final authState = _authCubit.state;
       if (authState is! Authenticated) {
         emit(const QuizError(message: 'User not authenticated.'));
@@ -46,27 +45,28 @@ class QuizCubit extends Cubit<QuizState> {
       }
       final userId = authState.userModel.uid;
 
-      // Check if a result already exists for this user and chapter
-      final existingResult = await _testRepository.getResultForUserAndChapter(
-        userId: userId,
-        chapterId: chapterId,
-      );
-
-      // If a result exists, show it immediately and bypass the quiz
-      if (existingResult != null) {
-        final questions = await _testRepository.getQuestions(
-          courseId: courseId,
-          subjectId: subjectId,
+      // ✅ Now, check for an existing result only if it's NOT a retest.
+      if (!forceRetest) {
+        final existingResult = await _testRepository.getResultForUserAndChapter(
+          userId: userId,
           chapterId: chapterId,
         );
-        emit(QuizCompleted(
-          result: existingResult,
-          questions: questions, // Pass questions for the review screen
-        ));
-        return;
+
+        if (existingResult != null) {
+          final questions = await _testRepository.getQuestions(
+            courseId: courseId,
+            subjectId: subjectId,
+            chapterId: chapterId,
+          );
+          emit(QuizCompleted(
+            result: existingResult,
+            questions: questions,
+          ));
+          return;
+        }
       }
 
-      // If no result exists, proceed to load questions and start the quiz
+      // If no result exists or it's a forced retest, proceed to load questions.
       final questions = await _testRepository.getQuestions(
         courseId: courseId,
         subjectId: subjectId,
@@ -87,6 +87,21 @@ class QuizCubit extends Cubit<QuizState> {
       emit(QuizError(message: 'Failed to load quiz: ${e.toString()}'));
     }
   }
+
+  // ... (rest of your Cubit methods) ...
+
+  /// Resets the quiz to its initial state for a retest.
+  void retest( {required String courseId, required String subjectId, required String chapterId}) { // Removed parameters from here
+    emit(QuizInitial());
+    // ✅ Call loadQuestions and force a retest
+    loadQuestions(
+      courseId: _currentCourseId!,
+      subjectId: _currentSubjectId!,
+      chapterId: _currentChapterId!,
+      forceRetest: true,
+    );
+  }
+
 
   /// Starts the timer for the current question.
   void _startTimer() {
@@ -194,18 +209,6 @@ class QuizCubit extends Cubit<QuizState> {
   }
 
   /// Resets the quiz to its initial state for a retest.
-  void retest({
-    required String courseId,
-    required String subjectId,
-    required String chapterId,
-  }) {
-    emit(QuizInitial());
-    loadQuestions(
-      courseId: courseId,
-      subjectId: subjectId,
-      chapterId: chapterId,
-    );
-  }
 
   @override
   Future<void> close() {

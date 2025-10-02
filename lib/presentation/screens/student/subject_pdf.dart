@@ -38,16 +38,46 @@ class SubjectPdf extends StatelessWidget {
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No subjects available for this course.'));
           }
+          final sortedSubjects = List<SubjectModel>.from(snapshot.data!)
+            ..sort((a, b) {
+              // If both have a number, sort numerically
+              if (a.subjectNumber != null && b.subjectNumber != null) {
+                return a.subjectNumber!.compareTo(b.subjectNumber!);
+              }
+              // If 'a' has a number and 'b' doesn't, 'a' comes first
+              else if (a.subjectNumber != null && b.subjectNumber == null) {
+                return -1;
+              }
+              // If 'b' has a number and 'a' doesn't, 'b' comes first
+              else if (a.subjectNumber == null && b.subjectNumber != null) {
+                return 1;
+              }
+              // If neither has a number, sort by title as a fallback
+              else {
+                return a.title.compareTo(b.title);
+              }
+            });
 
           final subjects = snapshot.data!;
           return ListView.builder(
-            itemCount: subjects.length,
+            itemCount: sortedSubjects.length,
             itemBuilder: (context, index) {
-              final subject = subjects[index];
+              final subject = sortedSubjects[index];
               return Card(
                 margin: const EdgeInsets.all(8.0),
                 child: ListTile(
-                  leading: const Icon(Icons.topic_rounded, color: Colors.blueAccent),
+                  leading: Container(
+                    width: 60,
+                    child: Row(
+                      children: [
+                        Text(
+                          subject.subjectNumber != null ? '${subject.subjectNumber}.' : '0',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const Icon(Icons.topic, color: Colors.blue),
+                      ],
+                    ),
+                  ),
                   title: Text(subject.title, style: const TextStyle(fontWeight: FontWeight.bold)),
                   trailing: const Icon(Icons.arrow_forward_ios),
                   onTap: () {

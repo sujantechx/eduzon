@@ -24,6 +24,7 @@ class PdfListScreen extends StatelessWidget {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,16 +46,46 @@ class PdfListScreen extends StatelessWidget {
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('No PDFs found for this chapter.'));
           }
+          final sortedPdfs = List<PdfModel>.from(snapshot.data!)
+            ..sort((a, b) {
+              // If both have a number, sort numerically
+              if (a.pdfNumber != null && b.pdfNumber != null) {
+                return a.pdfNumber!.compareTo(b.pdfNumber!);
+              }
+              // If 'a' has a number and 'b' doesn't, 'a' comes first
+              else if (a.pdfNumber != null && b.pdfNumber == null) {
+                return -1;
+              }
+              // If 'b' has a number and 'a' doesn't, 'b' comes first
+              else if (a.pdfNumber == null && b.pdfNumber != null) {
+                return 1;
+              }
+              // If neither has a number, sort by title as a fallback
+              else {
+                return a.title.compareTo(b.title);
+              }
+            });
 
           final pdfs = snapshot.data!;
           return ListView.builder(
-            itemCount: pdfs.length,
+            itemCount: sortedPdfs.length,
             itemBuilder: (context, index) {
-              final pdf = pdfs[index];
+              final pdf = sortedPdfs[index];
               return Card(
                 margin: const EdgeInsets.all(8.0),
                 child: ListTile(
-                  leading: const Icon(Icons.picture_as_pdf_rounded, color: Colors.deepPurple),
+                  leading:  Container(
+                    width: 60,
+                    child: Row(
+                      children: [
+                        Text(
+                          pdf.pdfNumber != null ? '${pdf.pdfNumber}.' : '',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const Icon(Icons.picture_as_pdf, color: Colors.red),
+                      ],
+                    ),
+                  ),
                   title: Text(pdf.title, style: const TextStyle(fontWeight: FontWeight.bold)),
                   trailing: const Icon(Icons.open_in_new),
                   onTap: () {
