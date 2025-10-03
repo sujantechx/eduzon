@@ -13,8 +13,7 @@ class QuizCubit extends Cubit<QuizState> {
   final AdminRepository _testRepository;
   final AuthCubit _authCubit;
   Timer? _timer;
-  final int _questionTimeLimit = 30;
-
+  final int _questionTimeLimit = 120; // 120 seconds per question
   String? _currentChapterId;
   String? _currentCourseId;
   String? _currentSubjectId;
@@ -34,6 +33,7 @@ class QuizCubit extends Cubit<QuizState> {
       _currentCourseId = courseId;
       _currentSubjectId = subjectId;
       _currentChapterId = chapterId;
+
 
       final authState = _authCubit.state;
       if (authState is! Authenticated) {
