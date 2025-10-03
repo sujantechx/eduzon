@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:eduzon/data/models/courses_moddel.dart';
-import 'package:eduzon/data/models/user_model.dart';
 import 'package:eduzon/presentation/screens/admin/manage_question.dart';
 import 'package:eduzon/presentation/screens/student/test_results.dart';
 import 'package:eduzon/presentation/screens/student/test_subjects.dart';
@@ -8,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'dart:developer' as developer;
 import '../../data/models/chapter_model.dart';
-import '../../data/models/pdf_model.dart';
 import '../../data/models/question_model.dart';
 import '../../data/models/subject_model.dart';
 import '../../logic/auth/auth_bloc.dart';
@@ -188,28 +186,56 @@ class AppRouter {
             return PdfViewerScreen(url: url);
           },
         ),
-        GoRoute(path: AppRoutes.testChapter,builder: (context,state){
-          final data=state.extra as Map<String,dynamic>;
-          final subject=data['subject'] as SubjectModel;
-          final courseId=data['courseId'] as String;
-          return TestChapter(subject: subject,courseId: courseId);
-        }),
-        GoRoute(path: AppRoutes.testScreen,builder: (context,state){
-          final data=state.extra as Map<String,dynamic>;
-          final subject=data['subject'] as SubjectModel;
-          final courseId=data['courseId'] as String;
-          final chapter=data['chapter'] as ChapterModel;
-          return TestScreen(courseId: courseId,subjectId: subject.id,chapterId: chapter ,);
-        }),
-        GoRoute(path: AppRoutes.quizResult,builder:(context,state){
-          final data=state.extra as Map<String,dynamic>;
-          final result=data['result'];
-          final questions=data['questions'] as List<QuestionModel>;
-          final courseId=data['courseId'] as String;
-          final subjectId=data['subjectId'] as String;
-          final chapterId=data['chapterId'] as String;
-          return QuizResultScreen(result: result, questions: questions, courseId: courseId, subjectId: subjectId, chapterId: chapterId,);
-        }),
+
+// lib/core/routes/app_routes.dart
+// ... other routes ...
+
+        GoRoute(
+          path: '/testChapter',
+          name: AppRoutes.testChapter, // Name the parent route
+          builder: (context, state) {
+            final data = state.extra as Map<String, dynamic>;
+            final subject = data['subject'] as SubjectModel;
+            final courseId = data['courseId'] as String;
+            return TestChapter(subject: subject, courseId: courseId);
+          },
+          routes: [
+            GoRoute(
+              path: '/testScreen', // ✅ Correct: This is a relative path
+              name: AppRoutes.testScreen, // Name the nested route
+              builder: (context, state) {
+                final data = state.extra as Map<String, dynamic>;
+                final subject = data['subject'] as SubjectModel; // Needs to be passed
+                final courseId = data['courseId'] as String;
+                final chapter = data['chapter'] as ChapterModel;
+                return TestScreen(
+                  courseId: courseId,
+                  subjectId: subject.id,
+                  chapter: chapter,
+                );
+              },
+            ),
+            GoRoute(
+              path: '/quizResult', // ✅ Correct: This is a relative path
+              name: AppRoutes.quizResult, // Name the nested route
+              builder: (context, state) {
+                final data = state.extra as Map<String, dynamic>;
+                final result = data['result'];
+                final questions = data['questions'] as List<QuestionModel>;
+                final courseId = data['courseId'] as String;
+                final subjectId = data['subjectId'] as String;
+                final chapterId = data['chapterId'] as String;
+                return QuizResultScreen(
+                  result: result,
+                  questions: questions,
+                  courseId: courseId,
+                  subjectId: subjectId,
+                  chapterId: chapterId,
+                );
+              },
+            ),
+          ],
+        ),
 
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) {

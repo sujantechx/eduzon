@@ -11,22 +11,22 @@ import '../../../logic/test/test_state.dart';
 class TestScreen extends StatelessWidget {
   final String courseId;
   final String subjectId;
-  final ChapterModel chapterId;
+  final ChapterModel chapter;
 
   const TestScreen({
     Key? key,
     required this.courseId,
     required this.subjectId,
-    required this.chapterId,
+    required this.chapter,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Load questions when the screen is first built
+    // Load questions when the screen is first built.
     context.read<QuizCubit>().loadQuestions(
       courseId: courseId,
       subjectId: subjectId,
-      chapterId: chapterId.id,
+      chapterId: chapter.id,
     );
 
     return Scaffold(
@@ -130,15 +130,14 @@ class TestScreen extends StatelessWidget {
 
   /// Builds the QuizResultScreen with all required data.
   Widget _buildResultScreen(BuildContext context, QuizCompleted state) {
-    final result = state.result;
     final questions = state.questions;
 
     return QuizResultScreen(
-      result: result,
+      result:state.result,
       questions: questions,
       courseId: courseId,
       subjectId: subjectId,
-      chapterId: chapterId.id,
+      chapterId: chapter.id,
     );
   }
 }

@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:eduzon/core/routes/app_routes.dart'; // Ensure this path is correct
+import 'package:eduzon/core/routes/app_routes.dart';
 import 'package:eduzon/data/models/chapter_model.dart';
 import 'package:eduzon/data/models/subject_model.dart';
 import 'package:eduzon/data/repositories/admin_repository.dart';
@@ -22,10 +22,8 @@ class TestChapter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Watch AuthCubit state to get user information and rebuild on changes
     final authState = context.watch<AuthCubit>().state;
     if (authState is! Authenticated) {
-      // Handle the case where the user is not authenticated.
       return const Center(child: CircularProgressIndicator());
     }
     final user = authState.userModel;
@@ -33,7 +31,6 @@ class TestChapter extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: Text(subject.title)),
       body: FutureBuilder<List<ChapterModel>>(
-        // Use the user's courseId from the AuthCubit state to fetch chapters
         future: context.read<AdminRepository>().getChapters(subjectId: subject.id, courseId: user.courseId),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -57,15 +54,13 @@ class TestChapter extends StatelessWidget {
                   leading: const Icon(Icons.article_rounded, color: Colors.green),
                   title: Text(chapter.title, style: const TextStyle(fontWeight: FontWeight.bold)),
                   trailing: const Icon(Icons.arrow_forward_ios),
-                  // Corrected onTap function. The async call is now properly structured.
                   onTap: () async {
                     final authState = context.read<AuthCubit>().state;
                     if (authState is Authenticated) {
                       final user = authState.userModel;
                       final userId = user.uid;
-                      final courseIdFromUser = user.courseId; // Get courseId from the user model
+                      final courseIdFromUser = user.courseId;
 
-                      // Use the repository to check for an existing result.
                       final testRepository = context.read<AdminRepository>();
                       final existingResult = await testRepository.getResultForUserAndChapter(
                         userId: userId,
@@ -73,14 +68,14 @@ class TestChapter extends StatelessWidget {
                       );
 
                       if (existingResult != null) {
-                        // If a result exists, fetch the questions and navigate to the result screen.
                         final questions = await testRepository.getQuestions(
                           courseId: courseIdFromUser,
                           subjectId: subject.id,
                           chapterId: chapter.id,
                         );
 
-                        context.go( // Use 'go' for top-level navigation to avoid history stack issues
+                        // ✅ Correct: Use push to navigate to the nested route
+                        context.pushNamed(
                           AppRoutes.quizResult,
                           extra: {
                             'result': existingResult,
@@ -91,18 +86,18 @@ class TestChapter extends StatelessWidget {
                           },
                         );
                       } else {
-                        // If no result exists, navigate to the quiz screen to start a new quiz.
-                        context.go( // Use 'go' here as well
+                        // ✅ Correct: Use push to navigate to the nested route
+                        context.pushNamed(
                           AppRoutes.testScreen,
                           extra: {
                             'subject': subject,
                             'chapter': chapter,
                             'courseId': courseIdFromUser,
+                            'subjectId': subject.id, // Pass subjectId for consistency
                           },
                         );
                       }
                     } else {
-                      // Optionally, handle unauthenticated user (e.g., show a snackbar or redirect)
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Please log in to take the quiz.')),
                       );

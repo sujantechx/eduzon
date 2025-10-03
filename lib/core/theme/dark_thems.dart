@@ -23,4 +23,11 @@ final ThemeData darkTheme = ThemeData(
     bodyMedium: TextStyle(fontSize: 14, color: Colors.white60),
     titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
   ),
+//   cardTheme: const CardTheme(
+//     color: Color(0xFF4996D0),
+//     margin: EdgeInsets.all(8.0),
+//     shape: RoundedRectangleBorder(
+//       borderRadius: BorderRadius.all(Radius.circular(12)),
+//     ),
+// ),
 );

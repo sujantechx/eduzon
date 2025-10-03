@@ -26,9 +26,6 @@ class QuizResultScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Quiz Results'),
-      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -61,7 +58,10 @@ class QuizResultScreen extends StatelessWidget {
                     (q) => q.id == answer['questionId'],
                 orElse: () => throw Exception('Question not found for ID: ${answer['questionId']}'),
               );
-              final isCorrect = answer['userAnswer'] == answer['correctAnswer'];
+
+              // ✅ CORRECTED: Use a null-safe approach for userAnswer
+              final userAnswerIndex = answer['userAnswer'] as int?;
+              final isCorrect = userAnswerIndex == answer['correctAnswer'];
 
               return Card(
                 color: isCorrect ? Colors.green.withOpacity(0.05) : Colors.red.withOpacity(0.05),
@@ -79,7 +79,8 @@ class QuizResultScreen extends StatelessWidget {
 
                       // User's Answer
                       Text(
-                        'Your Answer: ${question.options[answer['userAnswer']] ?? 'Not Answered'}',
+                        // ✅ CORRECTED: Provide a default string if userAnswerIndex is null
+                        'Your Answer: ${userAnswerIndex != null ? question.options[userAnswerIndex] : 'Not Answered'}',
                         style: TextStyle(color: isCorrect ? Colors.green : Colors.red),
                       ),
 
@@ -96,18 +97,22 @@ class QuizResultScreen extends StatelessWidget {
             const SizedBox(height: 20),
 
             // Retake Test Button
-            ElevatedButton(
-              onPressed: () {
-                // Pop the current results screen from the navigation stack.
-                // This is necessary to show the `TestScreen` again from its initial state.
-                context.pop();
+            Row(
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    // Pop the current results screen.
+                    // context.pop();
+                    // Trigger the retest logic in the QuizCubit.
+                    context.read<QuizCubit>().retest();
+                  },
+                  child: const Text('Retake Test'),
+                ),
+                const SizedBox(width: 16),
+                ElevatedButton(onPressed: ()=> context.pop(), child: Text("Final Submit"))
+              ],
+            )
 
-                // Trigger the retest logic in the QuizCubit.
-                // The Cubit will handle reloading the questions and resetting the state.
-                context.read<QuizCubit>().retest();
-              },
-              child: const Text('Retake Test'),
-            ),
           ],
         ),
       ),

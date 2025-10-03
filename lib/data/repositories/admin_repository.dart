@@ -146,11 +146,12 @@ class AdminRepository {
       final snapshot = await _questionsRef(
           courseId: courseId, subjectId: subjectId, chapterId: chapterId)
           .get();
+      if (snapshot.docs.isEmpty) return <QuestionModel>[];
       return snapshot.docs
           .map((doc) => QuestionModel.fromFirestore(doc))
           .toList();
-    } catch (e) {
-      developer.log("Error fetching questions: $e");
+    } catch (e, st) {
+      developer.log('Error fetching questions: $e', error: e, stackTrace: st);
       throw Exception('Failed to load questions.');
     }
   }
@@ -507,7 +508,36 @@ class AdminRepository {
       throw Exception('Failed to delete subject.');
     }
   }
-  Future<ResultModel> getPreviousResult({required String userId, required String chapterId}) async {
+/// Fetches the latest result for a given user & chapter using timestamp ordering.
+/// Returns null if no result found.
+  Future<ResultModel?> getResultForUserAndChapter({
+    required String userId,
+    required String chapterId,
+  }) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('results')
+          .where('userId', isEqualTo: userId)
+          .where('chapterId', isEqualTo: chapterId)
+          .orderBy('timestamp', descending: true) // Order by timestamp
+          .limit(1) // Get only the latest result
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        return null; // No result found
+      } else {
+        return ResultModel.fromFirestore(querySnapshot.docs.first);
+      }
+    } catch (e) {
+      developer.log("Error fetching result: $e");
+
+      throw Exception('Failed to fetch result.');
+    }
+  }
+  Future<ResultModel?> getPreviousResult({
+    required String userId,
+    required String chapterId,
+  }) async {
     try {
       final querySnapshot = await _firestore
           .collection('results')
@@ -518,89 +548,55 @@ class AdminRepository {
           .get();
 
       if (querySnapshot.docs.isEmpty) {
-        throw Exception('No previous results found.');
+        return null;
       }
 
       return ResultModel.fromFirestore(querySnapshot.docs.first);
-    } catch (e) {
-      print("Error fetching previous result: $e");
-      throw Exception('Failed to fetch previous result.');
+    } catch (e, st) {
+      developer.log('Error fetching previous result: $e', error: e, stackTrace: st);
+      rethrow;
     }
   }
-  // lib/data/repositories/test_repository.dart
-
-// ... (inside TestRepository class) ...
-
-  Future<ResultModel?> getResultForUserAndChapter({
-    required String userId,
-    required String chapterId,
-  }) async {
-    try {
-      // Construct the unique document ID
-      final resultDocId = '${userId}_$chapterId';
-
-      // Get the document from the results collection
-      final resultDoc = await _firestore.collection('results').doc(resultDocId).get();
-
-      if (resultDoc.exists) {
-        return ResultModel.fromFirestore(resultDoc);
-      }
-      return null;
-    } catch (e) {
-      developer.log('Error fetching user result: $e', error: e);
-      return null;
-    }
-  }
-
-// ... (your existing submitResult method) ...
-
-  /* Future<void>submitResult({required ResultModel result}) async {
-    try {
-      await _firestore.collection('results').add(result.toFirestore());
-    } catch (e) {
-      print("Error submitting result: $e");
-      throw Exception('Failed to submit result.');
-    }
-  }-*/
+  /// Submits (creates/overwrites) a result using the canonical doc id.
+  /// Uses set(...) to overwrite previous content.
   Future<void> submitResult({required ResultModel result}) async {
     try {
-      // Use the combined user and chapter IDs as the document ID
       final resultDocId = '${result.userId}_${result.chapterId}';
-      await _firestore
-          .collection('results')
-          .doc(resultDocId)
-          .set(result.toFirestore()); // Use .set() with a specific ID
-    } catch (e) {
-      print("Error submitting result: $e");
+      await _firestore.collection('results').doc(resultDocId).set(result.toFirestore());
+    } catch (e, st) {
+      developer.log('Error submitting result: $e', error: e, stackTrace: st);
       throw Exception('Failed to submit result.');
     }
   }
-
-// ✅ Add an updateResult method for retesting.
-// This is the key change to support retests without creating new documents.
+  /// Updates an existing result document for retests.
+  /// If the document doesn't exist, falls back to creating it (upsert).
   Future<void> updateResult({required ResultModel result}) async {
+    final resultDocId = '${result.userId}_${result.chapterId}';
+    final docRef = _firestore.collection('results').doc(resultDocId);
+
     try {
-      final resultDocId = '${result.userId}_${result.chapterId}';
-      await _firestore.collection('results').doc(resultDocId).update(result.toFirestore());
-    } catch (e) {
-      developer.log("Error updating result: $e", error: e);
+      // Try update first (this will fail if doc doesn't exist)
+      await docRef.update(result.toFirestore());
+    } on FirebaseException catch (firebaseError) {
+      // If the document is not found, write it instead (upsert).
+      // Other FirebaseExceptions are rethrown.
+      if (firebaseError.code == 'not-found' || firebaseError.message?.contains('No document to update') == true) {
+        developer.log('Result doc not found when updating; creating new doc instead.', error: firebaseError);
+        try {
+          await docRef.set(result.toFirestore());
+        } catch (setError, st) {
+          developer.log('Error setting result after update fallback: $setError', error: setError, stackTrace: st);
+          throw Exception('Failed to create result after update fallback.');
+        }
+      } else {
+        developer.log('FirebaseException updating result: $firebaseError', error: firebaseError);
+        throw Exception('Failed to update result: ${firebaseError.message}');
+      }
+    } catch (e, st) {
+      developer.log('Error updating result: $e', error: e, stackTrace: st);
       throw Exception('Failed to update result.');
     }
   }
-//
-// Future<List<QuestionModel>> getQuestions({
-//   required String courseId,
-//   required String subjectId,
-//   required String chapterId,
-// }) async {
-//   try {
-//     final snapshot = await _questionsRef(
-//         courseId: courseId, subjectId: subjectId, chapterId: chapterId)
-//         .get();
-//     return snapshot.docs.map((doc) => QuestionModel.fromFirestore(doc)).toList();
-//   } catch (e) {
-//     developer.log("Error fetching questions: $e", error: e);
-//     throw Exception('Failed to load questions.');
-//   }
-// }
+
+
 }

@@ -1,5 +1,8 @@
+// lib/data/models/result_model.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
+
 
 class ResultModel extends Equatable {
   final String id;
@@ -8,7 +11,7 @@ class ResultModel extends Equatable {
   final String chapterId;
   final int totalQuestions;
   final int correctAnswers;
-  final List<Map<String, dynamic>> answers; // Stores user answer and correct answer
+  final List<Map<String, dynamic>> answers;
 
   const ResultModel({
     required this.id,
@@ -20,7 +23,6 @@ class ResultModel extends Equatable {
     required this.answers,
   });
 
-  // ✅ Add the copyWith method here
   ResultModel copyWith({
     String? id,
     String? userId,
