@@ -1,4 +1,3 @@
-// lib/data/models/result_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
@@ -20,6 +19,27 @@ class ResultModel extends Equatable {
     required this.correctAnswers,
     required this.answers,
   });
+
+  // ✅ Add the copyWith method here
+  ResultModel copyWith({
+    String? id,
+    String? userId,
+    String? userName,
+    String? chapterId,
+    int? totalQuestions,
+    int? correctAnswers,
+    List<Map<String, dynamic>>? answers,
+  }) {
+    return ResultModel(
+      id: id ?? this.id,
+      userId: userId ?? this.userId,
+      userName: userName ?? this.userName,
+      chapterId: chapterId ?? this.chapterId,
+      totalQuestions: totalQuestions ?? this.totalQuestions,
+      correctAnswers: correctAnswers ?? this.correctAnswers,
+      answers: answers ?? this.answers,
+    );
+  }
 
   factory ResultModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>?;

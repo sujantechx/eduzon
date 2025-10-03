@@ -53,6 +53,7 @@ class TestScreen extends StatelessWidget {
     );
   }
 
+  /// Builds the screen for displaying the current question.
   Widget _buildQuestionScreen(BuildContext context, QuizLoaded state) {
     final question = state.questions[state.currentQuestionIndex];
     final selectedAnswer = state.userAnswers[question.id];
@@ -71,42 +72,36 @@ class TestScreen extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          // Question Content (Text or Image)
+          // ✅ Corrected Question Content Display
           Container(
             height: 250,
             width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
-              // color: Colors.grey[200],
+              color: Colors.grey[200],
             ),
-            child: question.type == 'image'
-                ? (question.imageUrl != null && question.imageUrl!.isNotEmpty
-                ? ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                question.imageUrl!,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                const Center(child: Text('Image not available')),
-              ),
-            )
-                : const Center(child: Text('Image not available')))
-                : (question.text != null && question.text!.isNotEmpty
-                ? Center(
-              child: Image.network(
+            child: Center(
+              child: question.type == 'image'
+                  ? (question.imageUrl != null && question.imageUrl!.isNotEmpty
+                  ? ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.network(
+                  question.imageUrl!,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) =>
+                  const Text('Image not available'),
+                ),
+              )
+                  : const Text('Image not available'))
+                  : (question.text != null && question.text!.isNotEmpty
+                  ? Text(
                 question.text!,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) =>
-                    Text(
-                      question.text!,
-                      style: const TextStyle(fontSize: 18),
-                      textAlign: TextAlign.center,
-                    ),
-              ),
-            )
-                : const Center(child: Text('No question text'))),
+                style: const TextStyle(fontSize: 18),
+                textAlign: TextAlign.center,
+              )
+                  : const Text('No question text')),
+            ),
           ),
-          const SizedBox(height: 16),
           const SizedBox(height: 16),
           // Options List
           ...List.generate(question.options.length, (index) {
@@ -132,13 +127,12 @@ class TestScreen extends StatelessWidget {
       ),
     );
   }
-// ... (inside the _buildResultScreen method)
 
+  /// Builds the QuizResultScreen with all required data.
   Widget _buildResultScreen(BuildContext context, QuizCompleted state) {
     final result = state.result;
     final questions = state.questions;
 
-    // Pass all the required IDs to the QuizResultScreen
     return QuizResultScreen(
       result: result,
       questions: questions,

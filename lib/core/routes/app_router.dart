@@ -194,7 +194,7 @@ class AppRouter {
           final courseId=data['courseId'] as String;
           return TestChapter(subject: subject,courseId: courseId);
         }),
-         GoRoute(path: AppRoutes.testScreen,builder: (context,state){
+        GoRoute(path: AppRoutes.testScreen,builder: (context,state){
           final data=state.extra as Map<String,dynamic>;
           final subject=data['subject'] as SubjectModel;
           final courseId=data['courseId'] as String;

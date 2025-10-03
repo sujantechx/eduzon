@@ -193,10 +193,10 @@ class AdminRepository {
 
   /// Adds a new chapter to a subject.
   Future<void> addChapter(
-      {required String courseId, 
+      {required String courseId,
         required String subjectId,
         required String title,
-        required int    chapterNumber    
+        required int    chapterNumber
       }) async {
     try {
       await _coursesRef()
@@ -225,7 +225,7 @@ class AdminRepository {
         required int videoNumber}) async {
     try {
       await _videosRef(
-          courseId: courseId, subjectId: subjectId, chapterId: chapterId, )
+        courseId: courseId, subjectId: subjectId, chapterId: chapterId, )
           .add({
         'title': title,
         'videoId': videoId,
@@ -273,7 +273,7 @@ class AdminRepository {
       await _questionsRef(
           courseId: courseId, subjectId: subjectId, chapterId: chapterId)
           .add(question.toFirestore(
-            questionNumber: questionNumber,
+        questionNumber: questionNumber,
       ));
     } catch (e) {
       developer.log("Error adding question: $e");
@@ -333,7 +333,7 @@ class AdminRepository {
     }
   }
   // deferent way to update chapter number
- /* Future<void> updateChapter(
+  /* Future<void> updateChapter(
       {required String courseId,
         required String subjectId,
         required String chapterId,
@@ -355,7 +355,7 @@ class AdminRepository {
     }
   }*/
 
-/// Updates an existing video's data.
+  /// Updates an existing video's data.
   Future<void> updateVideo(
       {required String courseId,
         required String subjectId,
@@ -507,17 +507,41 @@ class AdminRepository {
       throw Exception('Failed to delete subject.');
     }
   }
+  Future<ResultModel> getPreviousResult({required String userId, required String chapterId}) async {
+    try {
+      final querySnapshot = await _firestore
+          .collection('results')
+          .where('userId', isEqualTo: userId)
+          .where('chapterId', isEqualTo: chapterId)
+          .orderBy('timestamp', descending: true)
+          .limit(1)
+          .get();
 
-// ✅ All test-related methods should be in a separate repository.
-  // ✅ The methods below are shown for illustration and should be moved.
+      if (querySnapshot.docs.isEmpty) {
+        throw Exception('No previous results found.');
+      }
+
+      return ResultModel.fromFirestore(querySnapshot.docs.first);
+    } catch (e) {
+      print("Error fetching previous result: $e");
+      throw Exception('Failed to fetch previous result.');
+    }
+  }
+  // lib/data/repositories/test_repository.dart
+
+// ... (inside TestRepository class) ...
 
   Future<ResultModel?> getResultForUserAndChapter({
     required String userId,
     required String chapterId,
   }) async {
     try {
+      // Construct the unique document ID
       final resultDocId = '${userId}_$chapterId';
+
+      // Get the document from the results collection
       final resultDoc = await _firestore.collection('results').doc(resultDocId).get();
+
       if (resultDoc.exists) {
         return ResultModel.fromFirestore(resultDoc);
       }
@@ -528,29 +552,55 @@ class AdminRepository {
     }
   }
 
+// ... (your existing submitResult method) ...
+
+  /* Future<void>submitResult({required ResultModel result}) async {
+    try {
+      await _firestore.collection('results').add(result.toFirestore());
+    } catch (e) {
+      print("Error submitting result: $e");
+      throw Exception('Failed to submit result.');
+    }
+  }-*/
   Future<void> submitResult({required ResultModel result}) async {
     try {
+      // Use the combined user and chapter IDs as the document ID
       final resultDocId = '${result.userId}_${result.chapterId}';
-      await _firestore.collection('results').doc(resultDocId).set(result.toFirestore());
+      await _firestore
+          .collection('results')
+          .doc(resultDocId)
+          .set(result.toFirestore()); // Use .set() with a specific ID
     } catch (e) {
-      developer.log("Error submitting result: $e", error: e);
+      print("Error submitting result: $e");
       throw Exception('Failed to submit result.');
     }
   }
-  //
-  // Future<List<QuestionModel>> getQuestions({
-  //   required String courseId,
-  //   required String subjectId,
-  //   required String chapterId,
-  // }) async {
-  //   try {
-  //     final snapshot = await _questionsRef(
-  //         courseId: courseId, subjectId: subjectId, chapterId: chapterId)
-  //         .get();
-  //     return snapshot.docs.map((doc) => QuestionModel.fromFirestore(doc)).toList();
-  //   } catch (e) {
-  //     developer.log("Error fetching questions: $e", error: e);
-  //     throw Exception('Failed to load questions.');
-  //   }
-  // }
+
+// ✅ Add an updateResult method for retesting.
+// This is the key change to support retests without creating new documents.
+  Future<void> updateResult({required ResultModel result}) async {
+    try {
+      final resultDocId = '${result.userId}_${result.chapterId}';
+      await _firestore.collection('results').doc(resultDocId).update(result.toFirestore());
+    } catch (e) {
+      developer.log("Error updating result: $e", error: e);
+      throw Exception('Failed to update result.');
+    }
+  }
+//
+// Future<List<QuestionModel>> getQuestions({
+//   required String courseId,
+//   required String subjectId,
+//   required String chapterId,
+// }) async {
+//   try {
+//     final snapshot = await _questionsRef(
+//         courseId: courseId, subjectId: subjectId, chapterId: chapterId)
+//         .get();
+//     return snapshot.docs.map((doc) => QuestionModel.fromFirestore(doc)).toList();
+//   } catch (e) {
+//     developer.log("Error fetching questions: $e", error: e);
+//     throw Exception('Failed to load questions.');
+//   }
+// }
 }

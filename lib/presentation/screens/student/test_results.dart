@@ -1,34 +1,34 @@
 // lib/presentation/screens/student/quiz_result_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:eduzon/data/models/result_model.dart';
 import 'package:eduzon/data/models/question_model.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../logic/test/quiz_cubit.dart'; // Assuming you have access to this model
+import 'package:eduzon/logic/test/quiz_cubit.dart';
 
 class QuizResultScreen extends StatelessWidget {
   final ResultModel result;
   final List<QuestionModel> questions;
-  final String courseId; // Add this
-  final String subjectId; // Add this
-  final String chapterId; // Add this
+  final String courseId;
+  final String subjectId;
+  final String chapterId;
 
   const QuizResultScreen({
     Key? key,
     required this.result,
     required this.questions,
-    required this.courseId, // Make it required
-    required this.subjectId, // Make it required
-    required this.chapterId, // Make it required
+    required this.courseId,
+    required this.subjectId,
+    required this.chapterId,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-     /* appBar: AppBar(
+      appBar: AppBar(
         title: const Text('Quiz Results'),
-      ),*/
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -51,14 +51,16 @@ class QuizResultScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            // Review Answers Section
+
+            // Answer Review Section
             const Text('Answer Review', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const Divider(),
             ...result.answers.asMap().entries.map((entry) {
-              final index = entry.key;
               final answer = entry.value;
-              final question = questions.firstWhere((q) => q.id == answer['questionId']);
-
+              final question = questions.firstWhere(
+                    (q) => q.id == answer['questionId'],
+                orElse: () => throw Exception('Question not found for ID: ${answer['questionId']}'),
+              );
               final isCorrect = answer['userAnswer'] == answer['correctAnswer'];
 
               return Card(
@@ -68,16 +70,19 @@ class QuizResultScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Question
-                      question.type == 'image'
-                          ? Image.network(question.imageUrl!)
-                          : Text(question.text!),
+                      // Question content (text or image)
+                      if (question.type == 'image' && question.imageUrl != null)
+                        Image.network(question.imageUrl!),
+                      if (question.text != null)
+                        Text(question.text!),
                       const SizedBox(height: 8),
+
                       // User's Answer
                       Text(
                         'Your Answer: ${question.options[answer['userAnswer']] ?? 'Not Answered'}',
                         style: TextStyle(color: isCorrect ? Colors.green : Colors.red),
                       ),
+
                       // Correct Answer
                       Text(
                         'Correct Answer: ${question.options[answer['correctAnswer']]}',
@@ -89,17 +94,20 @@ class QuizResultScreen extends StatelessWidget {
               );
             }).toList(),
             const SizedBox(height: 20),
+
             // Retake Test Button
-             ElevatedButton(
-            onPressed: () {
-            // Pop the current results screen to go back to the chapter list.
-               Navigator.of(context).pop();
-            // Trigger the retest logic in the QuizCubit with the necessary IDs.
+            ElevatedButton(
+              onPressed: () {
+                // Pop the current results screen from the navigation stack.
+                // This is necessary to show the `TestScreen` again from its initial state.
+                context.pop();
 
-            },
-            child: const Text('Retake Test'),
-            )
-
+                // Trigger the retest logic in the QuizCubit.
+                // The Cubit will handle reloading the questions and resetting the state.
+                context.read<QuizCubit>().retest();
+              },
+              child: const Text('Retake Test'),
+            ),
           ],
         ),
       ),
