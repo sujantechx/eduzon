@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 
 final ThemeData darkTheme = ThemeData(
   brightness: Brightness.dark,
-  primarySwatch: Colors.deepPurple,
+  primarySwatch: Colors.deepOrange,
   scaffoldBackgroundColor: Colors.black,
   appBarTheme: const AppBarTheme(
-    backgroundColor: Colors.deepPurple,
+    backgroundColor: Colors.deepOrange,
     foregroundColor: Colors.white,
     elevation: 0,
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.deepPurple,
+      backgroundColor: Colors.deepOrange,
       foregroundColor: Colors.white,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(12)),

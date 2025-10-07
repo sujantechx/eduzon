@@ -15,7 +15,7 @@ class PublicCoursesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Our Courses'),
+        title: const Text('EduZon Courses'),
         actions: [
           // Add a button that takes users to the login screen
           TextButton(

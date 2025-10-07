@@ -1,12 +1,9 @@
 // lib/presentation/screens/profile/profile_screen.dart
-// ... all imports
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:eduzon/data/models/courses_moddel.dart';
 import 'package:eduzon/data/models/user_model.dart';
 import 'package:eduzon/logic/auth/auth_bloc.dart';
 import 'package:eduzon/logic/auth/auth_state.dart';
-import 'package:eduzon/data/models/courses_moddel.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -25,16 +22,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _coursesNameController = TextEditingController();
 
   bool _isEditing = false;
+  bool _loadingImage = false;
 
   @override
   void dispose() {
     _nameController.dispose();
     _addressController.dispose();
     _phoneController.dispose();
-    _coursesNameController.dispose();
     super.dispose();
   }
 
@@ -42,22 +38,145 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _nameController.text = user.name;
     _addressController.text = user.address;
     _phoneController.text = user.phone;
-    _coursesNameController.text = user.courseId;
   }
 
   Future<void> _updateProfile() async {
     if (_formKey.currentState!.validate()) {
-      final user = (context.read<AuthCubit>().state as Authenticated).userModel;
+      final state = context.read<AuthCubit>().state;
+      if (state is! Authenticated) return;
+
       context.read<AuthCubit>().updateProfile(
         name: _nameController.text.trim(),
         address: _addressController.text.trim(),
         phone: _phoneController.text.trim(),
         college: '',
         branch: '',
-        courseName: _coursesNameController.text.trim(),
+        courseName: state.userModel.courseId ?? '',
       );
+
       setState(() => _isEditing = false);
     }
+  }
+
+  Widget _profileHeader(BuildContext context, UserModel user) {
+    final theme = Theme.of(context);
+    final initials = (user.name.isNotEmpty)
+        ? user.name.trim().split(' ').map((e) => e.isNotEmpty ? e[0] : '').take(2).join()
+        : "U";
+    final avatarRadius = 46.0;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            CircleAvatar(
+              radius: 36,
+              backgroundColor: Colors.white.withOpacity(0.15),
+              child: Text(initials, style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold,)),
+            ),
+            // CircleAvatar(
+            //   radius: avatarRadius,
+            //   backgroundColor: Colors.grey[200],
+            //   backgroundImage: (user.photoUrl != null && user.photoUrl!.isNotEmpty)
+            //       ? NetworkImage(user.photoUrl!) as ImageProvider
+            //       : null,
+            //   child: (user.photoUrl == null || user.photoUrl!.isEmpty)
+            //       ? const Icon(Icons.person, size: 48, color: Colors.grey)
+            //       : null,
+            // ),
+            Positioned(
+              right: 0,
+              bottom: 0,
+              child: GestureDetector(
+                onTap: () => _showAvatarOptions(context),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: const EdgeInsets.all(6),
+                  child: const Icon(Icons.camera_alt, size: 16, color: Colors.white),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(user.name, style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Text(user.email, style: theme.textTheme.bodyMedium?.copyWith(color: Colors.grey[700])),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Chip(label: Text(user.role ?? 'Student')),
+                  const SizedBox(width: 8),
+                  // if (user.status != null) Chip(label: Text(user.status!)),
+                ],
+              )
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
+        IconButton(
+          onPressed: () => context.read<AuthCubit>().signOut(),
+          icon: const Icon(Icons.logout_outlined),
+          tooltip: 'Sign out',
+        ),
+      ],
+    );
+  }
+
+  Future<void> _showAvatarOptions(BuildContext context) async {
+    // For now we only show dummy options. Connect with image picker / upload logic if needed.
+    await showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library),
+              title: const Text('Choose from gallery'),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                // TODO: implement pick & upload
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Gallery picker not implemented')));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt),
+              title: const Text('Take a photo'),
+              onTap: () {
+                Navigator.of(ctx).pop();
+                // TODO: implement camera capture & upload
+                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Camera capture not implemented')));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.close),
+              title: const Text('Cancel'),
+              onTap: () => Navigator.of(ctx).pop(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _infoTile({required String label, required String value, IconData? icon}) {
+    return ListTile(
+      contentPadding: EdgeInsets.zero,
+      leading: icon != null ? Icon(icon, size: 20) : null,
+      title: Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+      subtitle: Text(value),
+    );
   }
 
   @override
@@ -65,12 +184,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => context.read<AuthCubit>().signOut(),
-          ),
-        ],
+        centerTitle: true,
       ),
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
@@ -78,9 +192,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _initializeControllers(state.userModel);
           }
           if (state is AuthError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message)));
           }
           if (state is Unauthenticated) {
             context.go(AppRoutes.login);
@@ -92,147 +204,178 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
 
           final user = state.userModel;
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'User Profile',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(height: 16),
 
-                if (!_isEditing)
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Name: ${user.name}', style: Theme.of(context).textTheme.titleMedium),
-                          const SizedBox(height: 8),
-                          Text('Email: ${user.email}'),
-                          const SizedBox(height: 8),
-                          Text('Address: ${user.address}'),
-                          Text('Phone: ${user.phone}'),
-                          // Text(' ${user.role}'),
-                          // const SizedBox(height: 8),
-                          // Text('Status: ${user.status}'),
-                          const SizedBox(height: 8),
-                          // Correctly using FutureBuilder
-                          FutureBuilder<DocumentSnapshot>(
-                            future: FirebaseFirestore.instance.collection('courses').doc(user.courseId).get(),
-                            builder: (context, snapshot) {
-                              String courseName = 'Loading...';
-                              if (snapshot.connectionState == ConnectionState.waiting) {
-                                courseName = 'Loading...';
-                              } else if (snapshot.hasError || !snapshot.hasData || !snapshot.data!.exists) {
-                                courseName = 'Not Found';
-                              } else {
-                                final courseData = snapshot.data!.data() as Map<String, dynamic>;
-                                courseName = courseData['title'] ?? 'Unknown';
-                              }
-                              return Text('Course Name: $courseName');
-                            },
-                          ),
-                          const SizedBox(height: 8),
-                          // Text('Course id: ${user.courseId}'),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                const SizedBox(height: 16),
-
-                _isEditing
-                    ? Form(
-                  key: _formKey,
+          return LayoutBuilder(builder: (context, constraints) {
+            final isWide = constraints.maxWidth > 800;
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: isWide ? 900 : double.infinity),
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TextFormField(
-                        controller: _nameController,
-                        decoration: InputDecoration(
-                          labelText: 'Name',
-                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.grey)),
-                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.blue)),
+                      // Header
+                      Card(
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: _profileHeader(context, user),
                         ),
-                        validator: (v) => v!.isEmpty ? 'Name cannot be empty' : null,
                       ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        decoration: InputDecoration(
-                          labelText: 'Email',
-                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.grey)),
-                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.blue)),
-                        ),
-                        controller: TextEditingController(text: user.email),
-                        readOnly: true,
+
+                      const SizedBox(height: 18),
+
+                      // Animated view / edit area
+                      AnimatedCrossFade(
+                        firstChild: _buildProfileView(context, user, isWide),
+                        secondChild: _buildEditForm(context, user, isWide),
+                        crossFadeState: _isEditing ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                        duration: const Duration(milliseconds: 300),
                       ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _addressController,
-                        decoration: InputDecoration(
-                          labelText: 'Address',
-                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.grey)),
-                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.blue)),
-                        ),
-                        validator: (v) => v!.isEmpty ? 'Address cannot be empty' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _phoneController,
-                        decoration: InputDecoration(
-                          labelText: 'Phone',
-                          enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.grey)),
-                          focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.blue)),
-                        ),
-                        validator: (v) => v!.isEmpty ? 'Phone cannot be empty' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      // TextFormField(
-                      //   decoration: InputDecoration(
-                      //     labelText: 'Course Name',
-                      //     enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.grey)),
-                      //     focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: const BorderSide(color: Colors.blue)),
-                      //   ),
-                      //   controller:_coursesNameController,
-                      //   readOnly: true,
-                      // ),
-                      const SizedBox(height: 24),
+
+                      const SizedBox(height: 20),
+
+                      // Action buttons
                       Row(
                         children: [
                           Expanded(
-                            child: ElevatedButton(
-                              onPressed: _updateProfile,
-                              child: const Text('Save'),
+                            child: ElevatedButton.icon(
+                              onPressed: () => setState(() => _isEditing = !_isEditing),
+                              icon: Icon(_isEditing ? Icons.visibility : Icons.edit),
+                              label: Text(_isEditing ? 'Cancel' : 'Edit Profile'),
+                              style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          TextButton(
-                            onPressed: () {
-                              _initializeControllers(user);
-                              setState(() => _isEditing = false);
-                            },
-                            child: const Text('Cancel'),
-                          ),
+                          const SizedBox(width: 12),
+                          if (!_isEditing)
+                            OutlinedButton.icon(
+                              onPressed: () {
+                                // Navigate to my courses or payments
+                                context.push(AppRoutes.myCourses);
+                              },
+                              icon: const Icon(Icons.book),
+                              label: const Text('My Courses'),
+                              style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
+                            )
                         ],
-                      ),
+                      )
                     ],
                   ),
-                )
-                    : ElevatedButton(
-                  onPressed: () => setState(() => _isEditing = true),
-                  child: const Text('Edit Profile'),
                 ),
-              ],
-            ),
-          );
+              ),
+            );
+          });
         },
       ),
     );
   }
+
+  Widget _buildProfileView(BuildContext context, UserModel user, bool isWide) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Card(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          elevation: 1,
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Column(
+              children: [
+                _infoTile(label: 'Name', value: user.name, icon: Icons.person),
+                const Divider(),
+                _infoTile(label: 'Email', value: user.email, icon: Icons.email),
+                const Divider(),
+                _infoTile(label: 'Phone', value: user.phone ?? '-', icon: Icons.phone),
+                const Divider(),
+                FutureBuilder<DocumentSnapshot>(
+                  future: FirebaseFirestore.instance.collection('courses').doc(user.courseId).get(),
+                  builder: (context, snapshot) {
+                    String courseName = 'Loading...';
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      courseName = 'Loading...';
+                    } else if (snapshot.hasError || !snapshot.hasData || !snapshot.data!.exists) {
+                      courseName = 'Not Found';
+                    } else {
+                      final courseData = snapshot.data!.data() as Map<String, dynamic>;
+                      courseName = courseData['title'] ?? 'Unknown';
+                    }
+                    return _infoTile(label: 'Course', value: courseName, icon: Icons.school);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEditForm(BuildContext context, UserModel user, bool isWide) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 1,
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _nameController,
+                decoration: InputDecoration(labelText: 'Name', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))),
+                validator: (v) => v == null || v.trim().isEmpty ? 'Name cannot be empty' : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                initialValue: user.email,
+                readOnly: true,
+                decoration: InputDecoration(labelText: 'Email', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _phoneController,
+                decoration: InputDecoration(labelText: 'Phone', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))),
+                validator: (v) => v == null || v.trim().isEmpty ? 'Phone cannot be empty' : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _addressController,
+                decoration: InputDecoration(labelText: 'Address', border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))),
+                validator: (v) => v == null || v.trim().isEmpty ? 'Address cannot be empty' : null,
+                maxLines: 2,
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _updateProfile,
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 14.0),
+                        child: Text('Save Changes'),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  OutlinedButton(
+                    onPressed: () {
+                      _initializeControllers(user);
+                      setState(() => _isEditing = false);
+                    },
+                    child: const Text('Cancel'),
+                  ),
+                ],
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
+
 
 
 /*import 'package:cloud_firestore/cloud_firestore.dart';

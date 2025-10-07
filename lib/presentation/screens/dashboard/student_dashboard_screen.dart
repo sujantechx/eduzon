@@ -3,11 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-// This is the shell UI for the student dashboard. It's a stateless widget
-// because GoRouter's StatefulShellRoute manages the state for us.
 class DashboardShell extends StatelessWidget {
-  // The navigationShell is provided by GoRouter. It contains the widget for the
-  // current branch (tab) and the logic to switch between branches.
   final StatefulNavigationShell navigationShell;
 
   const DashboardShell({
@@ -15,46 +11,65 @@ class DashboardShell extends StatelessWidget {
     required this.navigationShell,
   });
 
-  // This private method calls the goBranch method on the navigationShell
-  // to switch to the selected tab.
   void _onTap(int index) {
     navigationShell.goBranch(
       index,
-      // This is important: if the user taps the active tab again,
-      // it will reset the navigation stack for that tab.
       initialLocation: index == navigationShell.currentIndex,
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    const activeColor = Colors.orange;
+    const inactiveColor = Colors.grey;
+
     return Scaffold(
-      // The body of the scaffold is simply the navigationShell widget itself.
-      // GoRouter decides which screen to show here (Subjects, Notes, or Profile).
       body: navigationShell,
-
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        // The current index is taken directly from the navigationShell.
-        currentIndex: navigationShell.currentIndex,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.video_library),
-            label: 'Subjects', // Label updated to reflect the content
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.picture_as_pdf),
-            label: 'Notes',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.quiz), label: 'Test'),
-
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        // The onTap callback uses our method to navigate branches.
-        onTap: _onTap,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 8,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          currentIndex: navigationShell.currentIndex,
+          onTap: _onTap,
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          selectedItemColor: activeColor,
+          unselectedItemColor: inactiveColor,
+          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500),
+          showUnselectedLabels: true,
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.video_library),
+              label: 'Subjects',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.picture_as_pdf),
+              label: 'Notes',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.quiz),
+              label: 'Test',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Profile',
+            ),
+          ],
+        ),
       ),
     );
   }

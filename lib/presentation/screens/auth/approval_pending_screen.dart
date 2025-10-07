@@ -35,7 +35,7 @@ class PendingApprovalScreen extends StatelessWidget {
               ),
               SizedBox(height: 10),
               Text(
-                'Your registration is complete, but your account needs to be approved by an administrator. Please check back later.',
+                'Your registration is complete, but your account needs to be approved by an administrator. Please check back after 12hr.',
                 textAlign: TextAlign.center,
               ),
             ],

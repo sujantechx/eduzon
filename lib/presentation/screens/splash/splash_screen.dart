@@ -49,14 +49,14 @@ class _SplashScreenState extends State<SplashScreen> {
                   radius: 100,
                   backgroundImage:AssetImage("assets/icons/Eduzon_logo.jpg"),),
 
-                Text(
-                  'EDUZON',
-                  style: TextStyle(
-                    color: Colors.blueAccent,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                // Text(
+                //   'EDUZON',
+                //   style: TextStyle(
+                //     color: Colors.blueAccent,
+                //     fontSize: 28,
+                //     fontWeight: FontWeight.bold,
+                //   ),
+                // ),
               ],
             ),
           ),

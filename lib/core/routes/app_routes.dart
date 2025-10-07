@@ -31,6 +31,7 @@ class AppRoutes {
   static const String  testScreen = '/testScreen';
   static const String  testChapter = '/testChapter';
   static const String  quizResult = '/quizResult';
+  static const String myCourses = '/my-courses';
 
   // Admin Panel Routes
 

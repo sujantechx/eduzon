@@ -28,6 +28,7 @@ import '../../presentation/screens/profile/profile_screen.dart';
 import '../../presentation/screens/splash/splash_screen.dart';
 import '../../presentation/screens/student/chapter_pdf.dart';
 import '../../presentation/screens/student/chapters_list_screen.dart';
+import '../../presentation/screens/student/my_courses_page.dart';
 import '../../presentation/screens/student/pdf_list_screen.dart';
 import '../../presentation/screens/student/pdf_vewer_screen.dart';
 import '../../presentation/screens/student/subject_pdf.dart';
@@ -236,6 +237,8 @@ class AppRouter {
             ),
           ],
         ),
+        GoRoute(path:AppRoutes.myCourses,
+        builder: (context,state)=> const MyCoursesPage()),
 
         StatefulShellRoute.indexedStack(
           builder: (context, state, navigationShell) {

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:eduzon/data/repositories/admin_repository.dart';
 import 'package:eduzon/logic/Courses/courses_cubit.dart';
 import 'package:eduzon/logic/test/quiz_cubit.dart';
@@ -23,6 +24,54 @@ import 'logic/theme/theme_state.dart'; // Added import for ContentRepository req
 
 // Main entry point for the Student Zone app
 // Main entry point for the Student Zone app
+const String courseIdToAdd = "e4jxWFBp4j2aHELYj8qX"; // <-- IMPORTANT: Change this value
+
+Future<void> addCourseIdToAllUsers() async {
+  // 1. Get a reference to your Firestore database and the users collection
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+  CollectionReference users = firestore.collection('users');
+
+  try {
+    // 2. Fetch all documents from the users collection
+    QuerySnapshot querySnapshot = await users.get();
+    print("Found ${querySnapshot.docs.length} users to update.");
+
+    // 3. Create a WriteBatch
+    WriteBatch batch = firestore.batch();
+
+    // 4. Iterate through each user document and add the update to the batch
+    for (var doc in querySnapshot.docs) {
+      // Get the reference to the specific user document
+      DocumentReference userRef = users.doc(doc.id);
+
+      // Add the update operation to the batch
+      // This will add the 'coursesId' field. If the field already exists, it will be overwritten.
+      batch.update(userRef, {'coursesId': courseIdToAdd});
+    }
+
+    // 5. Commit the batch to apply all the updates at once
+    await batch.commit();
+
+    print("Successfully added course ID to all users.");
+
+  } catch (e) {
+    print("An error occurred: $e");
+  }
+}
+Future<void> removeCourseFromUser(String userId) async {
+  try {
+    DocumentReference userDoc = FirebaseFirestore.instance.collection('users').doc(userId);
+
+    // Update the document to remove the 'coursesId' field
+    await userDoc.update({
+      'coursesId': FieldValue.delete(),
+    });
+
+    print('coursesId field removed from user $userId.');
+  } catch (e) {
+    print('Error updating user: $e');
+  }
+}
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
@@ -53,7 +102,8 @@ void main() async {
     } catch (e) {
       developer.log('Error activating App Check: $e', error: e);
     }
-
+    // addCourseIdToAllUsers(); // Call the function to add courseId to all users
+    removeCourseFromUser("e4jxWFBp4j2aHELYj8qX"); // Call the function to remove courseId from a specific user
     runApp(const MyApp());
   } catch (e) {
     developer.log('Error initializing app: $e', error: e);
